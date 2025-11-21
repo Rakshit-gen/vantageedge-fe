@@ -87,15 +87,6 @@ export default function HomePage() {
             </motion.div>
             
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                Features
-              </Link>
-              <Link href="#pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                Pricing
-              </Link>
-              <Link href="#docs" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                Docs
-              </Link>
               <div className="h-6 w-px bg-border" />
               <Button variant="ghost" asChild>
                 <Link href="/auth/sign-in">Sign In</Link>
@@ -139,14 +130,14 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
                 <Button size="lg" className="w-full sm:w-auto group" asChild>
                   <Link href="/auth/sign-up">
-                    Start Free Trial
+                    Dashboard
                     <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto group" asChild>
-                  <Link href="#demo">
-                    <Play className="mr-2 h-4 w-4" />
-                    Watch Demo
+                <Button size="lg" className="w-full sm:w-auto group" asChild>
+                  <Link href="/docs">
+                    View Documentation
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </Button>
               </div>
@@ -224,12 +215,6 @@ export default function HomePage() {
                   Start free, scale infinitely.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <Button size="lg" asChild>
-                    <Link href="/auth/sign-up">
-                      Start Free Trial
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
                   <Button size="lg" variant="outline" asChild>
                     <Link href="/dashboard">
                       View Dashboard
@@ -245,37 +230,26 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="relative border-t">
         <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mb-8">
             <div>
               <h3 className="font-semibold mb-4">Product</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground transition-colors">Features</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Pricing</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Documentation</Link></li>
+                <li><Link href="/docs" className="hover:text-foreground transition-colors">Documentation</Link></li>
+                <li><Link href="/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Company</h3>
+              <h3 className="font-semibold mb-4">Account</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground transition-colors">About</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Blog</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Careers</Link></li>
+                <li><Link href="/auth/sign-in" className="hover:text-foreground transition-colors">Sign In</Link></li>
+                <li><Link href="/auth/sign-up" className="hover:text-foreground transition-colors">Sign Up</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Resources</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground transition-colors">Community</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Support</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Status</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground transition-colors">Privacy</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Terms</Link></li>
-                <li><Link href="#" className="hover:text-foreground transition-colors">Security</Link></li>
+                <li><Link href="/docs" className="hover:text-foreground transition-colors">API Reference</Link></li>
+                <li><Link href="/docs#getting-started" className="hover:text-foreground transition-colors">Getting Started</Link></li>
               </ul>
             </div>
           </div>
@@ -291,10 +265,7 @@ export default function HomePage() {
               © 2024 VantageEdge. All rights reserved.
             </p>
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
-              <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="https://github.com/rakshit-gen/vantageEdge" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
                 <Github className="h-5 w-5" />
               </Link>
             </div>
