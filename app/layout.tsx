@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   title: 'VantageEdge - Next-Gen API Gateway',
   description: 'Enterprise API Gateway with intelligent caching, advanced rate limiting, and real-time analytics',
   keywords: ['API Gateway', 'Rate Limiting', 'Caching', 'Analytics', 'Multi-tenant'],
+  icons: {
+    icon: '/gate.png',
+  },
 }
 
 export default function RootLayout({

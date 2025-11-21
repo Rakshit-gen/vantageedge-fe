@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { 
-  Sparkles, 
   Shield, 
   Zap, 
   BarChart3, 
@@ -80,8 +80,14 @@ export default function HomePage() {
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center space-x-2"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-purple-600">
-                <Sparkles className="h-5 w-5 text-white" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden">
+                <Image 
+                  src="/gate.png" 
+                  alt="VantageEdge" 
+                  width={40} 
+                  height={40} 
+                  className="object-contain"
+                />
               </div>
               <span className="text-xl font-bold gradient-text">VantageEdge</span>
             </motion.div>
@@ -112,7 +118,13 @@ export default function HomePage() {
               transition={{ duration: 0.5 }}
             >
               <div className="inline-flex items-center space-x-2 rounded-full border bg-muted/50 px-4 py-1.5 text-sm mb-6">
-                <Sparkles className="h-4 w-4 text-primary" />
+                <Image 
+                  src="/gate.png" 
+                  alt="VantageEdge" 
+                  width={16} 
+                  height={16} 
+                  className="object-contain"
+                />
                 <span>Introducing VantageEdge 2.0</span>
               </div>
               
@@ -256,8 +268,14 @@ export default function HomePage() {
           
           <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-purple-600">
-                <Sparkles className="h-4 w-4 text-white" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden">
+                <Image 
+                  src="/gate.png" 
+                  alt="VantageEdge" 
+                  width={32} 
+                  height={32} 
+                  className="object-contain"
+                />
               </div>
               <span className="font-semibold">VantageEdge</span>
             </div>

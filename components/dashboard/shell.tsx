@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { UserButton } from '@clerk/nextjs'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -15,7 +16,6 @@ import {
   Settings,
   Menu,
   X,
-  Sparkles,
   Bell,
   Search
 } from 'lucide-react'
@@ -63,8 +63,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           {/* Logo */}
           <div className="flex h-16 items-center border-b px-6">
             <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-purple-600">
-                <Sparkles className="h-4 w-4 text-white" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden">
+                <Image 
+                  src="/gate.png" 
+                  alt="VantageEdge" 
+                  width={32} 
+                  height={32} 
+                  className="object-contain"
+                />
               </div>
               <span className="text-lg font-bold gradient-text">VantageEdge</span>
             </Link>
