@@ -350,7 +350,7 @@ export default function HomePage() {
               <span className="font-semibold">VantageEdge</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 VantageEdge. All rights reserved.
+              © 2025 VantageEdge. All rights reserved.
             </p>
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <Link href="https://github.com/rakshit-gen/vantageEdge" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
