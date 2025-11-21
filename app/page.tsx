@@ -252,29 +252,60 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-20">
+      <section className="relative py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="glass rounded-3xl p-12 border text-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10" />
-              <div className="relative z-10">
-                <h2 className="text-4xl font-bold mb-4">
-                  Ready to Transform Your API Infrastructure?
-                </h2>
-                <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  Join developers using VantageEdge to power their APIs.
-                  Start free, scale infinitely.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <Button size="lg" variant="outline" asChild>
-                    <Link href="/dashboard">
-                      View Dashboard
-                    </Link>
-                  </Button>
+          <motion.div 
+            className="max-w-3xl mx-auto"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="relative">
+              {/* Unique diagonal accent line */}
+              <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-purple-500 to-transparent rounded-full" />
+              
+              <div className="glass rounded-2xl p-8 md:p-10 border-l-4 border-l-primary relative overflow-hidden group">
+                {/* Subtle gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <div className="relative z-10">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div className="flex-1">
+                      <h2 className="text-2xl md:text-3xl font-bold mb-2 gradient-text">
+                        Ready to Transform Your API Infrastructure?
+                      </h2>
+                      <p className="text-muted-foreground">
+                        Start free, scale infinitely.
+                      </p>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button 
+                        size="lg" 
+                        className="group relative overflow-hidden" 
+                        asChild
+                      >
+                        <Link href="/dashboard">
+                          Dashboard
+                          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      </Button>
+                      <Button 
+                        size="lg" 
+                        variant="outline" 
+                        asChild
+                      >
+                        <Link href="/docs">
+                          Docs
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
