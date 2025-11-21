@@ -1,60 +1,63 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { 
   Activity, 
   TrendingUp, 
   Zap, 
   AlertCircle,
-  ArrowUp,
-  ArrowDown,
   Globe,
   Server,
   Route,
   Key
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
-
-const stats = [
-  {
-    title: 'Total Requests',
-    value: '2,543,891',
-    change: '+12.5%',
-    trend: 'up',
-    icon: Activity,
-  },
-  {
-    title: 'Cache Hit Rate',
-    value: '87.2%',
-    change: '+3.1%',
-    trend: 'up',
-    icon: TrendingUp,
-  },
-  {
-    title: 'Avg Response Time',
-    value: '8.3ms',
-    change: '-2.4ms',
-    trend: 'up',
-    icon: Zap,
-  },
-  {
-    title: 'Error Rate',
-    value: '0.23%',
-    change: '-0.05%',
-    trend: 'up',
-    icon: AlertCircle,
-  },
-]
-
-const topRoutes = [
-  { path: '/api/users', requests: '1.2M', latency: '7ms', change: '+8%' },
-  { path: '/api/posts', requests: '890K', latency: '12ms', change: '+5%' },
-  { path: '/api/comments', requests: '654K', latency: '9ms', change: '-2%' },
-  { path: '/api/products', requests: '421K', latency: '15ms', change: '+12%' },
-]
+import { createClientAPI } from '@/lib/api/client-api'
+import { useTenant } from '@/lib/contexts/tenant-context'
+import { AnalyticsData } from '@/lib/types'
+import { formatNumber, formatPercent, formatDuration } from '@/lib/utils'
 
 export default function DashboardPage() {
+  const { tenantId } = useTenant()
+
+  // Fetch analytics data
+  const { data: analytics, isLoading } = useQuery({
+    queryKey: ['analytics', tenantId],
+    queryFn: async () => {
+      if (!tenantId) {
+        throw new Error('Tenant ID is required')
+      }
+      const api = createClientAPI(tenantId)
+      const response = await api.get('/analytics')
+      return response.data as AnalyticsData
+    },
+    enabled: !!tenantId,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  })
+
+  const stats = analytics ? [
+    {
+      title: 'Total Requests',
+      value: formatNumber(analytics.total_requests),
+      icon: Activity,
+    },
+    {
+      title: 'Cache Hit Rate',
+      value: formatPercent(analytics.cache_hit_rate),
+      icon: TrendingUp,
+    },
+    {
+      title: 'Avg Response Time',
+      value: formatDuration(analytics.avg_response_time),
+      icon: Zap,
+    },
+    {
+      title: 'Error Rate',
+      value: formatPercent(analytics.error_rate),
+      icon: AlertCircle,
+    },
+  ] : []
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -67,36 +70,36 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, i) => {
-          const Icon = stat.icon
-          const TrendIcon = stat.trend === 'up' ? ArrowUp : ArrowDown
-          
-          return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: i * 0.1 }}
-            >
-              <Card className="card-hover">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    {stat.title}
-                  </CardTitle>
-                  <Icon className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <div className="flex items-center space-x-1 text-xs mt-1">
-                    <TrendIcon className="h-3 w-3 text-success" />
-                    <span className="text-success font-medium">{stat.change}</span>
-                    <span className="text-muted-foreground">from last month</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )
-        })}
+        {isLoading ? (
+          [1, 2, 3, 4].map((i) => (
+            <Card key={i} className="shimmer h-32" />
+          ))
+        ) : (
+          stats.map((stat, i) => {
+            const Icon = stat.icon
+            
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: i * 0.1 }}
+              >
+                <Card className="card-hover">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      {stat.title}
+                    </CardTitle>
+                    <Icon className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
+          })
+        )}
       </div>
 
       {/* Charts and Activity */}
@@ -126,35 +129,42 @@ export default function DashboardPage() {
             <CardDescription>Most requested endpoints</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {topRoutes.map((route, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: i * 0.1 }}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-accent/5 hover:bg-accent/10 transition-colors"
-                >
-                  <div className="flex-1">
-                    <div className="font-mono text-sm font-medium">{route.path}</div>
-                    <div className="flex items-center space-x-4 mt-1">
-                      <span className="text-xs text-muted-foreground">
-                        {route.requests} requests
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {route.latency}
-                      </span>
+            {isLoading ? (
+              <div className="h-[300px] shimmer" />
+            ) : analytics && analytics.top_routes && analytics.top_routes.length > 0 ? (
+              <div className="space-y-4">
+                {analytics.top_routes.slice(0, 4).map((route, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: i * 0.1 }}
+                    className="flex items-center justify-between p-3 rounded-lg border bg-accent/5 hover:bg-accent/10 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <div className="font-mono text-sm font-medium">{route.path}</div>
+                      <div className="flex items-center space-x-4 mt-1">
+                        <span className="text-xs text-muted-foreground">
+                          {formatNumber(route.count)} requests
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDuration(route.avg_latency)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <div className={cn(
-                    "text-xs font-medium",
-                    route.change.startsWith('+') ? "text-success" : "text-muted-foreground"
-                  )}>
-                    {route.change}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
+                <div className="text-center space-y-2">
+                  <Route className="h-12 w-12 text-muted-foreground mx-auto" />
+                  <p className="text-sm text-muted-foreground">
+                    No route data available yet
+                  </p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

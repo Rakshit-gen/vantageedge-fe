@@ -28,21 +28,16 @@ export default function SettingsPage() {
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<'profile' | 'tenant' | 'notifications' | 'security'>('profile')
 
-  // Fetch tenant settings - Note: This endpoint may not exist, using tenantId from context
+  // Fetch tenant settings
   const { data: tenant, isLoading } = useQuery({
     queryKey: ['tenant', tenantId],
     queryFn: async () => {
       if (!tenantId) {
         throw new Error('Tenant ID is required')
       }
-      // Since we don't have a tenant lookup endpoint, return a mock tenant
-      // In a real app, you'd have an endpoint like /tenants/{tenantId}
-      return {
-        id: tenantId,
-        name: 'My Workspace',
-        subdomain: tenantId.substring(0, 20),
-        status: 'active',
-      } as Tenant
+      const api = createClientAPI(tenantId)
+      const response = await api.get(`/tenants/${tenantId}`)
+      return response.data as Tenant
     },
     enabled: !!tenantId,
   })

@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import { 
   Activity, 
   TrendingUp, 
-  TrendingDown,
   Zap,
   Clock,
   Globe,
@@ -38,29 +37,21 @@ export default function AnalyticsPage() {
     {
       title: 'Total Requests',
       value: formatNumber(analytics.total_requests),
-      change: '+12.5%',
-      trend: 'up',
       icon: Activity,
     },
     {
       title: 'Cache Hit Rate',
       value: formatPercent(analytics.cache_hit_rate),
-      change: '+3.1%',
-      trend: 'up',
       icon: TrendingUp,
     },
     {
       title: 'Avg Response Time',
       value: formatDuration(analytics.avg_response_time),
-      change: '-2.4ms',
-      trend: 'up',
       icon: Zap,
     },
     {
       title: 'Error Rate',
       value: formatPercent(analytics.error_rate),
-      change: '-0.05%',
-      trend: 'up',
       icon: AlertCircle,
     },
   ] : []
@@ -84,7 +75,6 @@ export default function AnalyticsPage() {
         ) : (
           stats.map((stat, i) => {
             const Icon = stat.icon
-            const TrendIcon = stat.trend === 'up' ? TrendingUp : TrendingDown
             
             return (
               <motion.div
@@ -102,11 +92,6 @@ export default function AnalyticsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{stat.value}</div>
-                    <div className="flex items-center space-x-1 text-xs mt-1">
-                      <TrendIcon className="h-3 w-3 text-success" />
-                      <span className="text-success font-medium">{stat.change}</span>
-                      <span className="text-muted-foreground">from last hour</span>
-                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
