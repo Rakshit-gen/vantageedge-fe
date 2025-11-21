@@ -58,10 +58,10 @@ const features = [
 ]
 
 const stats = [
-  { label: 'Uptime', value: '99.99%', suffix: '' },
-  { label: 'Latency', value: '< 10', suffix: 'ms' },
-  { label: 'Throughput', value: '100K+', suffix: 'req/s' },
-  { label: 'Customers', value: '500+', suffix: '' },
+  { label: 'Uptime', value: '99.9%', suffix: '' },
+  { label: 'Avg Latency', value: '< 50', suffix: 'ms' },
+  { label: 'API Endpoints', value: '10+', suffix: '' },
+  { label: 'Open Source', value: '100%', suffix: '' },
 ]
 
 export default function HomePage() {
@@ -177,34 +177,73 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="relative py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">
+      <section id="features" className="relative py-24 md:py-32 overflow-hidden">
+        {/* Background gradient orbs */}
+        <div className="absolute top-1/4 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div 
+            className="max-w-3xl mx-auto text-center mb-20"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 gradient-text">
               Everything You Need
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground">
               Production-ready features that scale with your business
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
             {features.map((feature, i) => {
               const Icon = feature.icon
               return (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className="glass rounded-2xl p-6 border card-hover group"
+                  transition={{ 
+                    duration: 0.6, 
+                    delay: i * 0.1,
+                    type: "spring",
+                    stiffness: 100
+                  }}
+                  whileHover={{ 
+                    y: -8,
+                    transition: { duration: 0.3 }
+                  }}
+                  className="glass rounded-2xl p-8 border border-border/50 card-hover group relative overflow-hidden"
                 >
-                  <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 mb-4 group-hover:scale-110 transition-transform`}>
-                    <Icon className={`h-6 w-6 ${feature.color}`} />
+                  {/* Animated gradient background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary/5 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-shimmer" />
+                  
+                  <div className="relative z-10">
+                    <motion.div 
+                      className={`inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 via-purple-500/20 to-pink-500/20 mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg shadow-primary/20`}
+                      whileHover={{ 
+                        scale: 1.15,
+                        rotate: 5,
+                        transition: { duration: 0.3 }
+                      }}
+                    >
+                      <Icon className={`h-8 w-8 ${feature.color} drop-shadow-lg`} />
+                    </motion.div>
+                    <h3 className="text-xl md:text-2xl font-bold mb-3 group-hover:text-primary transition-colors duration-300">
+                      {feature.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed group-hover:text-foreground/90 transition-colors duration-300">
+                      {feature.description}
+                    </p>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
+                  
+                  {/* Shine effect on hover */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                 </motion.div>
               )
             })}
@@ -223,7 +262,7 @@ export default function HomePage() {
                   Ready to Transform Your API Infrastructure?
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  Join 500+ companies using VantageEdge to power their APIs.
+                  Join developers using VantageEdge to power their APIs.
                   Start free, scale infinitely.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
