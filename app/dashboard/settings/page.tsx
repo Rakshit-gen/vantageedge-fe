@@ -11,7 +11,8 @@ import {
   Bell,
   Shield,
   Globe,
-  Save
+  Save,
+  Copy
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -151,6 +152,7 @@ export default function SettingsPage() {
               isLoading={isLoading}
               onUpdate={(data) => updateTenantMutation.mutate(data)}
               isUpdating={updateTenantMutation.isPending}
+              user={user}
             />
           )}
 
@@ -233,11 +235,13 @@ function TenantSettings({
   isLoading,
   onUpdate,
   isUpdating,
+  user,
 }: {
   tenant?: Tenant
   isLoading: boolean
   onUpdate: (data: Partial<Tenant>) => void
   isUpdating: boolean
+  user: any
 }) {
   const [formData, setFormData] = useState({
     name: tenant?.name || '',
@@ -287,6 +291,32 @@ function TenantSettings({
             </div>
             <p className="text-xs text-muted-foreground">
               Your gateway will be accessible at https://{formData.subdomain || 'subdomain'}.vantageedge.dev
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label>Tenant ID</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                value={tenant?.id || 'Loading...'}
+                readOnly
+                className="bg-muted/50 font-mono text-sm"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  if (tenant?.id) {
+                    navigator.clipboard.writeText(tenant.id)
+                    toast.success('Tenant ID copied to clipboard')
+                  }
+                }}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Use this ID in API requests. You can also use your Clerk User ID: <code className="text-xs bg-muted px-1 py-0.5 rounded">{user?.id}</code>
             </p>
           </div>
           <div className="flex items-center gap-2">
