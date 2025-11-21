@@ -1,4 +1,4 @@
-import { createClientAPI } from '@/lib/api/client-api'
+import { createAuthAPI } from '@/lib/api/client-api'
 
 export async function syncUserWithBackend(
   getToken: () => Promise<string | null>,
@@ -13,7 +13,7 @@ export async function syncUserWithBackend(
     const token = await getToken()
     if (!token) return null
 
-    const api = createClientAPI(() => Promise.resolve(token))
+    const api = createAuthAPI(getToken)
 
     const email = clerkUser.emailAddresses?.[0]?.emailAddress || ''
     if (!email) return null
@@ -40,7 +40,7 @@ export async function syncTenantWithBackend(
     const token = await getToken()
     if (!token) return null
 
-    const api = createClientAPI(() => Promise.resolve(token))
+    const api = createAuthAPI(getToken)
 
     const response = await api.post('/auth/sync-tenant', {
       clerk_user_id: clerkUserId,
@@ -63,7 +63,7 @@ export async function getCurrentUserFromBackend(
     const token = await getToken()
     if (!token) return null
 
-    const api = createClientAPI(() => Promise.resolve(token))
+    const api = createAuthAPI(getToken)
     const response = await api.get('/auth/me?clerk_user_id=' + encodeURIComponent(clerkUserId))
     return response.data
   } catch (error) {
@@ -80,7 +80,7 @@ export async function getCurrentTenantFromBackend(
     const token = await getToken()
     if (!token) return null
 
-    const api = createClientAPI(() => Promise.resolve(token))
+    const api = createAuthAPI(getToken)
     const response = await api.get('/auth/tenant?clerk_user_id=' + encodeURIComponent(clerkUserId))
     return response.data
   } catch (error) {

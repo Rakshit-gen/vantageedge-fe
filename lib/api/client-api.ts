@@ -42,3 +42,37 @@ export const createClientAPI = (tenantId: string | null) => {
 
   return client
 }
+
+// Create an API client for auth operations that uses token-based authentication
+export const createAuthAPI = (getToken: () => Promise<string | null>) => {
+  const client = axios.create({
+    baseURL: `${API_BASE_URL}/api/v1`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    timeout: 30000,
+  })
+
+  client.interceptors.request.use(
+    async (config) => {
+      // Add Authorization header with token
+      const token = await getToken()
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
+      return config
+    },
+    (error) => {
+      return Promise.reject(error)
+    }
+  )
+
+  client.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      return Promise.reject(error)
+    }
+  )
+
+  return client
+}

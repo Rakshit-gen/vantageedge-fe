@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientAPI } from './client-api'
+import { createAuthAPI } from './client-api'
 import { useAuth } from '@clerk/nextjs'
 
 export interface UserSyncData {
@@ -19,7 +19,7 @@ export interface TenantSyncData {
 
 // Create a client-side API client factory
 export function createAuthSyncService(getToken: () => Promise<string | null>) {
-  const apiClient = createClientAPI(getToken)
+  const apiClient = createAuthAPI(getToken)
 
   return {
     // Sync user with backend
