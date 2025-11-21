@@ -14,7 +14,6 @@ export default function SignInPage() {
       <div className="relative z-10 w-full max-w-md">
         <SignIn 
           appearance={{
-            baseTheme: 'dark',
             variables: {
               colorPrimary: 'hsl(262 83% 58%)',
               colorBackground: 'hsl(240 8% 6%)',

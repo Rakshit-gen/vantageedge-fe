@@ -19,28 +19,64 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createClientAPI } from '@/lib/api/client-api'
+import { createAuthAPI } from '@/lib/api/client-api'
 import { useTenant } from '@/lib/contexts/tenant-context'
+import { useAuth } from '@clerk/nextjs'
 import { Tenant } from '@/lib/types'
 import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const { tenantId } = useTenant()
   const { user } = useUser()
+  const { getToken } = useAuth()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<'profile' | 'tenant' | 'notifications' | 'security'>('profile')
 
-  // Fetch tenant settings
+  // Fetch tenant settings - try to get from backend first, fallback to using tenantId
   const { data: tenant, isLoading } = useQuery({
-    queryKey: ['tenant', tenantId],
+    queryKey: ['tenant', tenantId, user?.id],
     queryFn: async () => {
-      if (!tenantId) {
-        throw new Error('Tenant ID is required')
+      if (!user?.id) {
+        throw new Error('User ID is required')
       }
-      const api = createClientAPI(tenantId)
-      const response = await api.get(`/tenants/${tenantId}`)
-      return response.data as Tenant
+      
+      try {
+        // Try to get tenant from auth endpoint first
+        const token = await getToken()
+        if (token) {
+          const authApi = createAuthAPI(getToken)
+          const response = await authApi.get(`/auth/tenant?clerk_user_id=${encodeURIComponent(user.id)}`)
+          if (response.data) {
+            return response.data as Tenant
+          }
+        }
+      } catch (err) {
+        console.log('Auth endpoint failed, trying direct tenant lookup:', err)
+      }
+      
+      // Fallback: try to get tenant using tenantId (Clerk ID)
+      if (tenantId) {
+        try {
+          const api = createClientAPI(tenantId)
+          const response = await api.get(`/tenants/${tenantId}`)
+          return response.data as Tenant
+        } catch (err) {
+          // If that fails, create a mock tenant with the Clerk ID
+          console.log('Direct tenant lookup failed, using Clerk ID as tenant ID:', err)
+          return {
+            id: tenantId,
+            name: 'My Workspace',
+            subdomain: tenantId.substring(0, 20),
+            status: 'active',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          } as Tenant
+        }
+      }
+      
+      throw new Error('Unable to fetch tenant information')
     },
-    enabled: !!tenantId,
+    enabled: !!user?.id,
   })
 
   const updateTenantMutation = useMutation({
@@ -149,6 +185,7 @@ export default function SettingsPage() {
           {activeTab === 'tenant' && (
             <TenantSettings
               tenant={tenant}
+              tenantId={tenantId}
               isLoading={isLoading}
               onUpdate={(data) => updateTenantMutation.mutate(data)}
               isUpdating={updateTenantMutation.isPending}
@@ -232,12 +269,14 @@ export default function SettingsPage() {
 
 function TenantSettings({
   tenant,
+  tenantId,
   isLoading,
   onUpdate,
   isUpdating,
   user,
 }: {
   tenant?: Tenant
+  tenantId: string | null
   isLoading: boolean
   onUpdate: (data: Partial<Tenant>) => void
   isUpdating: boolean
@@ -297,7 +336,7 @@ function TenantSettings({
             <Label>Tenant ID</Label>
             <div className="flex items-center gap-2">
               <Input
-                value={tenant?.id || 'Loading...'}
+                value={tenantId || user?.id || 'Loading...'}
                 readOnly
                 className="bg-muted/50 font-mono text-sm"
               />
@@ -306,8 +345,9 @@ function TenantSettings({
                 variant="outline"
                 size="icon"
                 onClick={() => {
-                  if (tenant?.id) {
-                    navigator.clipboard.writeText(tenant.id)
+                  const idToCopy = tenantId || user?.id
+                  if (idToCopy) {
+                    navigator.clipboard.writeText(idToCopy)
                     toast.success('Tenant ID copied to clipboard')
                   }
                 }}
@@ -316,7 +356,10 @@ function TenantSettings({
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Use this ID in API requests. You can also use your Clerk User ID: <code className="text-xs bg-muted px-1 py-0.5 rounded">{user?.id}</code>
+              Use this Clerk User ID in API requests. The backend will automatically resolve it to your tenant.
+              {tenant?.id && tenant.id !== tenantId && (
+                <span className="block mt-1">Backend Tenant UUID: <code className="text-xs bg-muted px-1 py-0.5 rounded">{tenant.id}</code></span>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-2">
