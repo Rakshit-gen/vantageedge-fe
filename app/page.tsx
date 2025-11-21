@@ -125,7 +125,7 @@ export default function HomePage() {
                   height={16} 
                   className="object-contain"
                 />
-                <span>Introducing VantageEdge 2.0</span>
+                <span>Introducing VantageEdge</span>
               </div>
               
               <h1 className="text-6xl md:text-7xl font-bold tracking-tight mb-6">
