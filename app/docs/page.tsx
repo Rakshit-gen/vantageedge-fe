@@ -1,520 +1,276 @@
-'use client'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
+import { CodeBlock } from '@/components/code-block'
 
-import { motion } from 'framer-motion'
-import { 
-  Book, 
-  Code, 
-  Key, 
-  Route, 
-  Server, 
-  Zap, 
-  Shield, 
-  Database,
-  ArrowRight,
-  Copy,
-  CheckCircle2
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { toast } from 'sonner'
+export const metadata = {
+  title: 'VantageEdge · docs',
+  description: 'How the exchange works and how to drive it from the API.',
+}
+
+const SECTIONS = [
+  ['overview', 'Overview'],
+  ['auth', 'Authentication'],
+  ['origins', 'Origins'],
+  ['routes', 'Routes'],
+  ['pool', 'Origin pools'],
+  ['keys', 'API keys'],
+  ['analytics', 'Analytics'],
+  ['auth-modes', 'Auth modes'],
+]
 
 export default function DocsPage() {
-  const copyCode = (code: string) => {
-    navigator.clipboard.writeText(code)
-    toast.success('Copied to clipboard')
-  }
-
-  const CodeBlock = ({ code, language = 'bash' }: { code: string; language?: string }) => (
-    <div className="relative group">
-      <pre className="bg-muted/50 border border-border rounded-lg p-4 overflow-x-auto">
-        <code className="text-sm font-mono">{code}</code>
-      </pre>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-        onClick={() => copyCode(code)}
-      >
-        <Copy className="h-4 w-4" />
-      </Button>
-    </div>
-  )
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/50">
-      {/* Header */}
-      <div className="border-b border-border/50 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20">
-                <Book className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold gradient-text">VantageEdge Docs</h1>
-                <p className="text-xs text-muted-foreground">API Gateway Documentation</p>
-              </div>
-            </div>
-            <Button asChild>
-              <a href="/dashboard">Go to Dashboard</a>
-            </Button>
-          </div>
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-3xl items-center gap-4 px-5">
+          <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> VantageEdge
+          </Link>
+          <Link
+            href="/dashboard"
+            className="ml-auto rounded bg-patch px-3 py-1.5 text-sm font-medium text-primary-foreground"
+          >
+            Open console
+          </Link>
         </div>
-      </div>
+      </header>
 
-      <div className="container mx-auto px-4 py-12 max-w-5xl">
-        {/* Hero Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-5xl font-bold gradient-text mb-4">
-            VantageEdge API Gateway
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Enterprise-grade API Gateway with intelligent routing, caching, rate limiting, and real-time analytics
+      <div className="mx-auto max-w-3xl px-5 py-12">
+        <h1 className="font-display text-3xl font-semibold tracking-tight">Documentation</h1>
+        <p className="mt-3 text-muted-foreground">
+          The gateway forwards requests; the control plane API configures it. Both are one call away from
+          each other, so a change here applies at the edge within seconds.
+        </p>
+
+        <nav className="ledger mt-8 flex flex-wrap gap-x-4 gap-y-1 border-y border-border py-3 text-xs">
+          {SECTIONS.map(([id, label]) => (
+            <a key={id} href={`#${id}`} className="text-muted-foreground hover:text-foreground">
+              {label}
+            </a>
+          ))}
+        </nav>
+
+        <Section id="overview" title="Overview">
+          <p>
+            Every request to your subdomain runs through the same pipeline: match a route by path and
+            priority, apply its auth mode, spend a rate-limit token, check the response cache, then forward
+            to a healthy origin in the route’s pool. The outcome (status, latency, cache hit, limit hit) is
+            written to the request log, which is what the Traffic panel reads.
           </p>
-        </motion.div>
+          <p>
+            The control plane API lives under <Code>/api/v1</Code>. Every route requires a verified Clerk
+            JWT. The tenant is resolved from the token; you never pass a tenant id. On your first
+            authenticated call, a tenant is provisioned for you automatically.
+          </p>
+          <CodeBlock
+            code={`# base URL
+https://<your-control-plane-host>/api/v1
 
-        {/* Quick Links */}
-        <div className="grid md:grid-cols-4 gap-4 mb-16">
-          <Card className="card-hover cursor-pointer" onClick={() => document.getElementById('getting-started')?.scrollIntoView({ behavior: 'smooth' })}>
-            <CardHeader>
-              <Zap className="h-8 w-8 text-primary mb-2" />
-              <CardTitle className="text-base">Quick Start</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card className="card-hover cursor-pointer" onClick={() => document.getElementById('authentication')?.scrollIntoView({ behavior: 'smooth' })}>
-            <CardHeader>
-              <Shield className="h-8 w-8 text-primary mb-2" />
-              <CardTitle className="text-base">Authentication</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card className="card-hover cursor-pointer" onClick={() => document.getElementById('api-reference')?.scrollIntoView({ behavior: 'smooth' })}>
-            <CardHeader>
-              <Code className="h-8 w-8 text-primary mb-2" />
-              <CardTitle className="text-base">API Reference</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card className="card-hover cursor-pointer" onClick={() => document.getElementById('examples')?.scrollIntoView({ behavior: 'smooth' })}>
-            <CardHeader>
-              <Book className="h-8 w-8 text-primary mb-2" />
-              <CardTitle className="text-base">Examples</CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
+# every request
+Authorization: Bearer <clerk session jwt>`}
+          />
+          <Callout>
+            If your Clerk instance needs a JWT template for the backend audience, set{' '}
+            <Code>NEXT_PUBLIC_CLERK_JWT_TEMPLATE</Code> and the console mints the token with it.
+          </Callout>
+        </Section>
 
-        {/* Getting Started */}
-        <section id="getting-started" className="mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <Zap className="h-6 w-6 text-primary" />
-              <h2 className="text-3xl font-bold">Getting Started</h2>
-            </div>
-            <Card>
-              <CardHeader>
-                <CardTitle>1. Get Your API Key</CardTitle>
-                <CardDescription>
-                  Sign up and generate an API key from the dashboard
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  After signing up, navigate to <strong>Dashboard → API Keys</strong> and generate your first API key.
-                </p>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-success" />
-                  <span className="text-sm">API keys are prefixed with <code className="bg-muted px-1 py-0.5 rounded">ve_live_</code></span>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </section>
+        <Section id="auth" title="Authentication">
+          <p>
+            Two ways in. People use a Clerk session; the browser attaches{' '}
+            <Code>Authorization: Bearer &lt;jwt&gt;</Code> automatically. Machines use an API key in the{' '}
+            <Code>X-API-Key</Code> header, issued from the Keys panel with the scopes it needs.
+          </p>
+          <CodeBlock
+            code={`# session (what the console sends)
+curl https://<host>/api/v1/routes \\
+  -H "Authorization: Bearer $CLERK_JWT"
 
-        {/* Authentication */}
-        <section id="authentication" className="mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <Shield className="h-6 w-6 text-primary" />
-              <h2 className="text-3xl font-bold">Authentication</h2>
-            </div>
-            
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Key className="h-5 w-5" />
-                    API Key Authentication
-                  </CardTitle>
-                  <CardDescription>
-                    Use your API key in the X-API-Key header
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <CodeBlock code={`curl -X GET "https://vantageedge.onrender.com/api/v1/api-keys/tenant/YOUR_TENANT_ID" \\
-  -H "X-API-Key: ve_live_your_api_key_here"`} />
-                </CardContent>
-              </Card>
+# machine caller
+curl https://<host>/api/v1/routes \\
+  -H "X-API-Key: ve_live_..."`}
+          />
+        </Section>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    JWT Token Authentication
-                  </CardTitle>
-                  <CardDescription>
-                    Use Clerk JWT token in Authorization header
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <CodeBlock code={`curl -X GET "https://vantageedge.onrender.com/api/v1/origins/tenant/YOUR_TENANT_ID" \\
-  -H "Authorization: Bearer YOUR_CLERK_JWT_TOKEN"`} />
-                </CardContent>
-              </Card>
-            </div>
-          </motion.div>
-        </section>
-
-        {/* API Reference */}
-        <section id="api-reference" className="mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <Code className="h-6 w-6 text-primary" />
-              <h2 className="text-3xl font-bold">API Reference</h2>
-            </div>
-
-            <div className="space-y-6">
-              {/* Origins */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Server className="h-5 w-5" />
-                    Origins (Backend Services)
-                  </CardTitle>
-                  <CardDescription>Manage your backend services</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Badge variant="outline" className="mb-2">POST</Badge>
-                    <p className="text-sm font-medium mb-2">Create Origin</p>
-                    <CodeBlock code={`curl -X POST "https://vantageedge.onrender.com/api/v1/origins" \\
-  -H "X-API-Key: YOUR_API_KEY" \\
+        <Section id="origins" title="Origins">
+          <p>An origin is a backend the gateway can forward to. Health checks run on the interval you set; a failing origin is taken out of rotation until it passes again.</p>
+          <EndpointList
+            rows={[
+              ['GET', '/origins', 'List origins'],
+              ['POST', '/origins', 'Create an origin'],
+              ['GET', '/origins/{id}', 'Fetch one'],
+              ['PATCH', '/origins/{id}', 'Update fields'],
+              ['DELETE', '/origins/{id}', 'Remove'],
+            ]}
+          />
+          <CodeBlock
+            code={`curl -X POST https://<host>/api/v1/origins \\
+  -H "Authorization: Bearer $CLERK_JWT" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "tenant_id": "YOUR_TENANT_ID",
-    "name": "My Backend API",
-    "url": "https://api.example.com",
+    "name": "orders-api",
+    "url": "https://orders.internal.example.com",
     "health_check_path": "/health",
-    "timeout_seconds": 30,
-    "weight": 100
-  }'`} />
-                  </div>
-                  <div>
-                    <Badge variant="outline" className="mb-2">GET</Badge>
-                    <p className="text-sm font-medium mb-2">List Origins</p>
-                    <CodeBlock code={`curl -X GET "https://vantageedge.onrender.com/api/v1/origins/tenant/YOUR_TENANT_ID" \\
-  -H "X-API-Key: YOUR_API_KEY"`} />
-                  </div>
-                </CardContent>
-              </Card>
+    "health_check_interval": 30,
+    "timeout_seconds": 5,
+    "max_retries": 3,
+    "weight": 1
+  }'`}
+          />
+        </Section>
 
-              {/* Routes */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Route className="h-5 w-5" />
-                    Routes
-                  </CardTitle>
-                  <CardDescription>Configure routing rules</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Badge variant="outline" className="mb-2">POST</Badge>
-                    <p className="text-sm font-medium mb-2">Create Route</p>
-                    <CodeBlock code={`curl -X POST "https://vantageedge.onrender.com/api/v1/routes" \\
-  -H "X-API-Key: YOUR_API_KEY" \\
+        <Section id="routes" title="Routes">
+          <p>
+            A route binds a path pattern to an origin and carries its policy: methods, priority, auth mode,
+            rate limit, cache. Higher <Code>priority</Code> wins when patterns overlap.
+          </p>
+          <EndpointList
+            rows={[
+              ['GET', '/routes', 'List routes'],
+              ['POST', '/routes', 'Create a route'],
+              ['GET', '/routes/{id}', 'Fetch one'],
+              ['PATCH', '/routes/{id}', 'Update fields'],
+              ['DELETE', '/routes/{id}', 'Remove'],
+            ]}
+          />
+          <CodeBlock
+            code={`curl -X POST https://<host>/api/v1/routes \\
+  -H "Authorization: Bearer $CLERK_JWT" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "tenant_id": "YOUR_TENANT_ID",
-    "origin_id": "ORIGIN_ID",
-    "name": "Users API",
-    "path_pattern": "/api/users/*",
+    "origin_id": "<origin uuid>",
+    "name": "orders",
+    "path_pattern": "/api/orders/*",
     "methods": ["GET", "POST"],
-    "auth_mode": "public",
-    "is_active": true
-  }'`} />
-                  </div>
-                  <div>
-                    <Badge variant="outline" className="mb-2">GET</Badge>
-                    <p className="text-sm font-medium mb-2">List Routes</p>
-                    <CodeBlock code={`curl -X GET "https://vantageedge.onrender.com/api/v1/routes/tenant/YOUR_TENANT_ID" \\
-  -H "X-API-Key: YOUR_API_KEY"`} />
-                  </div>
-                </CardContent>
-              </Card>
+    "priority": 10,
+    "auth_mode": "jwt_required",
+    "is_active": true,
+    "rate_limit_enabled": true,
+    "rate_limit_requests_per_second": 50,
+    "rate_limit_burst": 20,
+    "cache_enabled": false
+  }'`}
+          />
+        </Section>
 
-              {/* API Keys */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Key className="h-5 w-5" />
-                    API Keys
-                  </CardTitle>
-                  <CardDescription>Manage API keys for authentication</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Badge variant="outline" className="mb-2">POST</Badge>
-                    <p className="text-sm font-medium mb-2">Generate API Key</p>
-                    <CodeBlock code={`curl -X POST "https://vantageedge.onrender.com/api/v1/api-keys" \\
-  -H "X-API-Key: YOUR_API_KEY" \\
+        <Section id="pool" title="Origin pools">
+          <p>
+            Beyond its primary origin, a route can load-balance across a pool. Members are weighted and
+            health-checked like any origin.
+          </p>
+          <EndpointList
+            rows={[
+              ['GET', '/routes/{id}/origins', 'List the pool'],
+              ['POST', '/routes/{id}/origins/{origin_id}', 'Add to the pool'],
+              ['DELETE', '/routes/{id}/origins/{origin_id}', 'Remove from the pool'],
+            ]}
+          />
+        </Section>
+
+        <Section id="keys" title="API keys">
+          <p>
+            Keys authenticate machine callers. The secret is returned once, on creation. Scopes are{' '}
+            <Code>read</Code>, <Code>write</Code>, <Code>admin</Code>; expiry is optional.
+          </p>
+          <EndpointList
+            rows={[
+              ['GET', '/api-keys', 'List keys'],
+              ['POST', '/api-keys', 'Generate a key'],
+              ['DELETE', '/api-keys/{id}', 'Revoke'],
+            ]}
+          />
+          <CodeBlock
+            code={`curl -X POST https://<host>/api/v1/api-keys \\
+  -H "Authorization: Bearer $CLERK_JWT" \\
   -H "Content-Type: application/json" \\
-  -d '{
-    "tenant_id": "YOUR_TENANT_ID",
-    "name": "Production Key",
-    "scopes": ["read", "write"]
-  }'`} />
-                  </div>
-                  <div>
-                    <Badge variant="outline" className="mb-2">GET</Badge>
-                    <p className="text-sm font-medium mb-2">List API Keys</p>
-                    <CodeBlock code={`curl -X GET "https://vantageedge.onrender.com/api/v1/api-keys/tenant/YOUR_TENANT_ID" \\
-  -H "X-API-Key: YOUR_API_KEY"`} />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </motion.div>
-        </section>
+  -d '{ "name": "ci-deploy", "scopes": ["read","write"], "expires_at": "2026-12-31T23:59:59Z" }'
+# -> { ..., "key": "ve_live_xxx" }   (shown once)`}
+          />
+        </Section>
 
-        {/* Features */}
-        <section id="features" className="mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <Zap className="h-6 w-6 text-primary" />
-              <h2 className="text-3xl font-bold">Features</h2>
-            </div>
+        <Section id="analytics" title="Analytics">
+          <p>
+            A rollup of the request log for a time window. Buckets are hourly for <Code>1h</Code> and{' '}
+            <Code>24h</Code>, daily beyond that.
+          </p>
+          <EndpointList rows={[['GET', '/analytics?window=1h|24h|7d|30d', 'Traffic rollup']]} />
+          <CodeBlock
+            code={`curl "https://<host>/api/v1/analytics?window=24h" \\
+  -H "Authorization: Bearer $CLERK_JWT"
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Route className="h-5 w-5 text-primary" />
-                    Intelligent Routing
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Path pattern matching, multiple HTTP methods, priority-based routing, and path rewriting
-                  </p>
-                </CardContent>
-              </Card>
+{
+  "window": "24h",
+  "generated_at": "2026-08-29T12:00:00Z",
+  "totals": {
+    "total_requests": 48210,
+    "error_rate": 0.012,
+    "cache_hit_rate": 0.41,
+    "rate_limited_count": 88,
+    "avg_latency_ms": 37.4,
+    "p95_latency_ms": 121.0
+  },
+  "series": [ { "ts": "...", "count": 2010, "avg_latency_ms": 35.1, "error_count": 12 } ],
+  "status_breakdown": { "200": 46110, "404": 900, "500": 210 },
+  "top_routes": [ { "path": "/api/orders/*", "count": 12005, "avg_latency_ms": 41.2, "error_count": 30 } ]
+}`}
+          />
+        </Section>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="h-5 w-5 text-primary" />
-                    Distributed Caching
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Redis-powered caching with configurable TTL, cache key patterns, and hit/miss tracking
-                  </p>
-                </CardContent>
-              </Card>
+        <Section id="auth-modes" title="Auth modes">
+          <p>Set per route, in <Code>auth_mode</Code>:</p>
+          <EndpointList
+            rows={[
+              ['public', '', 'No authentication. Anyone can call it.'],
+              ['jwt_required', '', 'A valid Clerk JWT must be present.'],
+              ['apikey_required', '', 'A valid X-API-Key must be present.'],
+              ['both', '', 'JWT and API key both required.'],
+            ]}
+          />
+        </Section>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-primary" />
-                    Rate Limiting
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Token bucket and sliding window algorithms with per-route configuration
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-primary" />
-                    Load Balancing
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Round-robin, least connections, and consistent hashing strategies with health checks
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </motion.div>
-        </section>
-
-        {/* Examples */}
-        <section id="examples" className="mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <Book className="h-6 w-6 text-primary" />
-              <h2 className="text-3xl font-bold">Examples</h2>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Complete Setup Example</CardTitle>
-                <CardDescription>End-to-end example of setting up a route</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm font-medium mb-2">1. Create an Origin</p>
-                  <CodeBlock code={`curl -X POST "https://vantageedge.onrender.com/api/v1/origins" \\
-  -H "X-API-Key: ve_live_your_key" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "tenant_id": "user_35nWDaBYe62a2J01bBDm1k2lej7",
-    "name": "JSONPlaceholder",
-    "url": "https://jsonplaceholder.typicode.com",
-    "health_check_path": "/",
-    "timeout_seconds": 30,
-    "weight": 100
-  }'`} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium mb-2">2. Create a Route</p>
-                  <CodeBlock code={`curl -X POST "https://vantageedge.onrender.com/api/v1/routes" \\
-  -H "X-API-Key: ve_live_your_key" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "tenant_id": "user_35nWDaBYe62a2J01bBDm1k2lej7",
-    "origin_id": "ORIGIN_ID_FROM_STEP_1",
-    "name": "Posts API",
-    "path_pattern": "/api/posts/*",
-    "methods": ["GET"],
-    "auth_mode": "public",
-    "is_active": true
-  }'`} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium mb-2">3. Test the Route</p>
-                  <CodeBlock code={`# Once gateway is configured, test your route:
-curl https://your-subdomain.vantageedge.dev/api/posts/1`} />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </section>
-
-        {/* Auth Modes */}
-        <section id="auth-modes" className="mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <Shield className="h-6 w-6 text-primary" />
-              <h2 className="text-3xl font-bold">Authentication Modes</h2>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Public</CardTitle>
-                  <CardDescription>No authentication required</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Badge variant="outline">public</Badge>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>JWT Required</CardTitle>
-                  <CardDescription>Clerk JWT token needed</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Badge variant="outline">jwt_required</Badge>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>API Key Required</CardTitle>
-                  <CardDescription>X-API-Key header needed</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Badge variant="outline">apikey_required</Badge>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Both Required</CardTitle>
-                  <CardDescription>JWT and API key both needed</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Badge variant="outline">both</Badge>
-                </CardContent>
-              </Card>
-            </div>
-          </motion.div>
-        </section>
-
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="text-center"
-        >
-          <Card className="bg-gradient-to-br from-primary/10 to-purple-500/10 border-primary/20">
-            <CardContent className="pt-12 pb-12">
-              <h2 className="text-3xl font-bold mb-4 gradient-text">Ready to Get Started?</h2>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Sign up for free and start managing your API gateway in minutes
-              </p>
-              <div className="flex gap-4 justify-center">
-                <Button size="lg" asChild>
-                  <a href="/auth/sign-up">
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </a>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <a href="/dashboard">Go to Dashboard</a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+        <div className="mt-16 border-t border-border pt-8">
+          <Link href="/dashboard" className="text-sm text-patch hover:underline">
+            Open the console →
+          </Link>
+        </div>
       </div>
     </div>
   )
 }
 
+function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+  return (
+    <section id={id} className="scroll-mt-20 border-t border-border py-10 first-of-type:border-0">
+      <h2 className="font-display text-xl font-semibold tracking-tight">{title}</h2>
+      <div className="mt-4 space-y-4 text-sm leading-relaxed text-muted-foreground [&_p]:text-muted-foreground">
+        {children}
+      </div>
+    </section>
+  )
+}
+
+function Code({ children }: { children: React.ReactNode }) {
+  return <code className="rounded-[3px] bg-muted px-1 py-0.5 font-mono text-[0.85em] text-foreground">{children}</code>
+}
+
+function Callout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded border-l-2 border-patch bg-card/60 px-4 py-3 text-sm text-muted-foreground">
+      {children}
+    </div>
+  )
+}
+
+function EndpointList({ rows }: { rows: [string, string, string][] }) {
+  return (
+    <div className="ledger overflow-hidden rounded border border-border text-xs">
+      {rows.map(([verb, path, desc], i) => (
+        <div key={i} className="flex items-center gap-3 border-b border-border/70 px-3 py-2 last:border-0">
+          <span className="w-16 shrink-0 uppercase text-patch">{verb}</span>
+          {path && <code className="shrink-0 text-foreground">{path}</code>}
+          <span className="text-muted-foreground">{desc}</span>
+        </div>
+      ))}
+    </div>
+  )
+}

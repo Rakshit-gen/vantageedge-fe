@@ -1,67 +1,44 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
-import { useOrganization, useUser } from '@clerk/nextjs'
+import { createContext, useContext } from 'react'
+import { useAuth } from '@clerk/nextjs'
+import { useQuery } from '@tanstack/react-query'
+import { tenantApi } from '@/lib/api/resources'
+import { qk } from '@/lib/hooks/use-resource'
+import type { Tenant } from '@/lib/types'
 
-interface TenantContextType {
-  tenantId: string | null
-  loading: boolean
-  error: string | null
+interface TenantContextValue {
+  tenant: Tenant | undefined
+  isLoading: boolean
+  error: Error | null
 }
 
-const TenantContext = createContext<TenantContextType>({
-  tenantId: null,
-  loading: true,
-  error: null,
-})
+const TenantContext = createContext<TenantContextValue | null>(null)
 
+/**
+ * The tenant is resolved by the backend from the Clerk JWT (auto-provisioned
+ * on first authenticated request). This just surfaces `GET /tenants/me` —
+ * the real tenant UUID, name, subdomain — to the whole dashboard.
+ */
 export function TenantProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useUser()
-  const { organization } = useOrganization()
-  const [tenantId, setTenantId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { isSignedIn } = useAuth()
 
-  useEffect(() => {
-    const getTenantId = () => {
-      setLoading(true)
-      try {
-        // Use Clerk organization ID as tenant ID, or user ID as fallback
-        // In production, you might want to map this to your backend tenant IDs
-        if (organization?.id) {
-          setTenantId(organization.id)
-        } else if (user?.id) {
-          // Fallback to user ID if no organization
-          setTenantId(user.id)
-        } else {
-          setError('No user or organization found')
-        }
-      } catch (err) {
-        console.error('Error getting tenant ID:', err)
-        setError('Failed to get tenant information')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (user || organization) {
-      getTenantId()
-    } else {
-      setLoading(false)
-    }
-  }, [user, organization])
+  const { data, isLoading, error } = useQuery({
+    queryKey: qk.tenant,
+    queryFn: tenantApi.get,
+    enabled: !!isSignedIn,
+    staleTime: 5 * 60 * 1000,
+  })
 
   return (
-    <TenantContext.Provider value={{ tenantId, loading, error }}>
+    <TenantContext.Provider value={{ tenant: data, isLoading, error: error as Error | null }}>
       {children}
     </TenantContext.Provider>
   )
 }
 
 export function useTenant() {
-  const context = useContext(TenantContext)
-  if (!context) {
-    throw new Error('useTenant must be used within TenantProvider')
-  }
-  return context
+  const ctx = useContext(TenantContext)
+  if (!ctx) throw new Error('useTenant must be used within TenantProvider')
+  return ctx
 }

@@ -1,196 +1,138 @@
 'use client'
 
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
-import { 
-  Activity, 
-  TrendingUp, 
-  Zap,
-  Clock,
-  Globe,
-  AlertCircle
-} from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { createClientAPI } from '@/lib/api/client-api'
-import { useTenant } from '@/lib/contexts/tenant-context'
-import { AnalyticsData } from '@/lib/types'
-import { formatNumber, formatPercent, formatDuration } from '@/lib/utils'
+import { analyticsApi } from '@/lib/api/resources'
+import { qk } from '@/lib/hooks/use-resource'
+import type { AnalyticsWindow } from '@/lib/types'
+import { Stat } from '@/components/stat'
+import { WindowToggle } from '@/components/window-toggle'
+import { CacheDonut, LatencyLine, Sparkline, StatusBars, ThroughputArea } from '@/components/charts'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { formatCompact, formatLatency, formatPercent, relativeTime } from '@/lib/utils'
 
-export default function AnalyticsPage() {
-  const { tenantId } = useTenant()
-
-  const { data: analytics, isLoading } = useQuery({
-    queryKey: ['analytics', tenantId],
-    queryFn: async () => {
-      if (!tenantId) {
-        throw new Error('Tenant ID is required')
-      }
-      const api = createClientAPI(tenantId)
-      const response = await api.get('/analytics')
-      return response.data as AnalyticsData
-    },
-    enabled: !!tenantId,
-    refetchInterval: 30000, // Refresh every 30 seconds
+export default function TrafficPage() {
+  const [win, setWin] = useState<AnalyticsWindow>('24h')
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: qk.analytics(win),
+    queryFn: () => analyticsApi.get(win),
+    refetchInterval: 20_000,
   })
 
-  const stats = analytics ? [
-    {
-      title: 'Total Requests',
-      value: formatNumber(analytics.total_requests),
-      icon: Activity,
-    },
-    {
-      title: 'Cache Hit Rate',
-      value: formatPercent(analytics.cache_hit_rate),
-      icon: TrendingUp,
-    },
-    {
-      title: 'Avg Response Time',
-      value: formatDuration(analytics.avg_response_time),
-      icon: Zap,
-    },
-    {
-      title: 'Error Rate',
-      value: formatPercent(analytics.error_rate),
-      icon: AlertCircle,
-    },
-  ] : []
+  const t = data?.totals
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight gradient-text">Analytics</h1>
-        <p className="text-muted-foreground mt-1">
-          Real-time insights into your API gateway performance
-        </p>
-      </div>
+    <div className="space-y-8">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Traffic</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Read from the request log. Updated {data ? relativeTime(data.generated_at) : '…'};
+            polling every 20s.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
+            <span className="lamp lamp-on" />
+            {isFetching ? 'reading' : 'live'}
+          </span>
+          <WindowToggle value={win} onChange={setWin} />
+        </div>
+      </header>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {isLoading ? (
-          [1, 2, 3, 4].map((i) => (
-            <Card key={i} className="shimmer h-32 border-border/50 bg-card/50" />
-          ))
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {isLoading || !t ? (
+          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[104px]" />)
         ) : (
-          stats.map((stat, i) => {
-            const Icon = stat.icon
-            
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.1 }}
-              >
-                <Card className="card-hover border-border/50 bg-card/50">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      {stat.title}
-                    </CardTitle>
-                    <Icon className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )
-          })
+          <>
+            <Stat label="Requests" value={formatCompact(t.total_requests)} accent="patch" />
+            <Stat label="Errors" value={formatPercent(t.error_rate)} accent={t.error_rate > 0.05 ? 'alert' : 'default'} />
+            <Stat label="Rate-limited" value={formatCompact(t.rate_limited_count)} accent="warning" />
+            <Stat label="p95 latency" value={formatLatency(t.p95_latency_ms)} accent="lamp" sub={`avg ${formatLatency(t.avg_latency_ms)}`} />
+          </>
         )}
-      </div>
+      </section>
 
-      {/* Charts and Tables */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Request Status Distribution */}
-        <Card className="border-border/50 bg-card/50">
-          <CardHeader>
-            <CardTitle>Requests by Status</CardTitle>
-            <CardDescription>Last 24 hours</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="h-[300px] shimmer" />
-            ) : analytics ? (
-              <div className="space-y-3">
-                {Object.entries(analytics.requests_by_status).map(([status, count]) => (
-                  <div key={status} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full ${
-                        status.startsWith('2') ? 'bg-success' :
-                        status.startsWith('3') ? 'bg-warning' :
-                        status.startsWith('4') ? 'bg-destructive' :
-                        'bg-muted-foreground'
-                      }`} />
-                      <span className="text-sm">{status} {status === '200' ? 'OK' : status === '404' ? 'Not Found' : status === '500' ? 'Error' : ''}</span>
-                    </div>
-                    <span className="font-medium">{formatNumber(count)}</span>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
-
-        {/* Top Routes */}
-        <Card className="border-border/50 bg-card/50">
-          <CardHeader>
-            <CardTitle>Top Routes</CardTitle>
-            <CardDescription>Most requested endpoints</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="h-[300px] shimmer" />
-            ) : analytics ? (
-              <div className="space-y-3">
-                {analytics.top_routes.slice(0, 5).map((route, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: i * 0.1 }}
-                    className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-background/50"
-                  >
-                    <div className="flex-1">
-                      <div className="font-mono text-sm font-medium">{route.path}</div>
-                      <div className="flex items-center space-x-4 mt-1 text-xs text-muted-foreground">
-                        <span>{formatNumber(route.count)} requests</span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {formatDuration(route.avg_latency)}
-                        </span>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Request Timeline */}
-      <Card className="border-border/50 bg-card/50">
-        <CardHeader>
-          <CardTitle>Request Timeline</CardTitle>
-          <CardDescription>Requests over time (last 7 days)</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <section className="grid gap-6 lg:grid-cols-2">
+        <Panel title="throughput">
+          {isLoading ? <Skeleton className="h-[240px]" /> : <ThroughputArea data={data!.series} />}
+        </Panel>
+        <Panel title="latency (avg)">
+          {isLoading ? <Skeleton className="h-[240px]" /> : <LatencyLine data={data!.series} />}
+        </Panel>
+        <Panel title="status codes">
+          {isLoading ? <Skeleton className="h-[240px]" /> : <StatusBars breakdown={data!.status_breakdown} />}
+        </Panel>
+        <Panel title="cache hit rate">
           {isLoading ? (
-            <div className="h-[300px] shimmer" />
-          ) : analytics ? (
-            <div className="h-[300px] flex items-center justify-center border-2 border-dashed border-border/50 rounded-lg">
-              <div className="text-center space-y-2">
-                <Globe className="h-12 w-12 text-muted-foreground mx-auto" />
-                <p className="text-sm text-muted-foreground">
-                  Chart visualization coming soon
-                </p>
+            <Skeleton className="h-[200px]" />
+          ) : (
+            <div className="relative">
+              <CacheDonut hitRate={t?.cache_hit_rate ?? 0} />
+              <div className="pointer-events-none absolute inset-0 grid place-content-center">
+                <span className="mono-num text-2xl text-lamp">{formatPercent(t?.cache_hit_rate ?? 0)}</span>
               </div>
             </div>
-          ) : null}
-        </CardContent>
-      </Card>
+          )}
+        </Panel>
+      </section>
+
+      <section className="space-y-3">
+        <div className="eyebrow">routes by volume</div>
+        <div className="panel">
+          {isLoading ? (
+            <Skeleton className="m-4 h-56" />
+          ) : (data?.top_routes ?? []).length === 0 ? (
+            <p className="px-4 py-8 text-sm text-muted-foreground">No routes have taken traffic yet.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Path</TableHead>
+                  <TableHead className="w-24 text-right">Requests</TableHead>
+                  <TableHead className="w-24 text-right">Avg</TableHead>
+                  <TableHead className="w-20 text-right">Errors</TableHead>
+                  <TableHead className="w-28">Shape</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data!.top_routes.map((r) => (
+                  <TableRow key={r.path}>
+                    <TableCell className="max-w-[240px] truncate text-foreground">{r.path}</TableCell>
+                    <TableCell className="text-right tabular-nums">{formatCompact(r.count)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{formatLatency(r.avg_latency_ms)}</TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">
+                      {r.error_count > 0 ? <span className="text-destructive">{r.error_count}</span> : '0'}
+                    </TableCell>
+                    <TableCell>
+                      <Sparkline points={sparkFor(data!.series, r.count)} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+      </section>
     </div>
   )
 }
 
+function Panel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-3">
+      <div className="eyebrow">{title}</div>
+      <div className="panel p-4">{children}</div>
+    </div>
+  )
+}
+
+// The per-route series isn't broken out by the endpoint, so shape the overall
+// throughput curve to the route's share — enough to read the trend, honest
+// about being an approximation.
+function sparkFor(series: { count: number }[], routeTotal: number): number[] {
+  const overall = series.reduce((s, b) => s + b.count, 0) || 1
+  const share = routeTotal / overall
+  return series.map((b) => b.count * share)
+}

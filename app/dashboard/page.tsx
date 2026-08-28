@@ -1,226 +1,191 @@
 'use client'
 
+import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
-import { 
-  Activity, 
-  TrendingUp, 
-  Zap, 
-  AlertCircle,
-  Globe,
-  Server,
-  Route,
-  Key
-} from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { createClientAPI } from '@/lib/api/client-api'
-import { useTenant } from '@/lib/contexts/tenant-context'
-import { AnalyticsData } from '@/lib/types'
-import { formatNumber, formatPercent, formatDuration } from '@/lib/utils'
+import { ArrowUpRight } from 'lucide-react'
+import { analyticsApi, originsApi, routesApi } from '@/lib/api/resources'
+import { qk } from '@/lib/hooks/use-resource'
+import type { AnalyticsWindow } from '@/lib/types'
+import { Stat } from '@/components/stat'
+import { Patchboard, type PatchCable, type PatchJack } from '@/components/patchboard'
+import { ThroughputArea } from '@/components/charts'
+import { Skeleton } from '@/components/ui/skeleton'
+import { WindowToggle } from '@/components/window-toggle'
+import { formatCompact, formatLatency, formatPercent, truncate } from '@/lib/utils'
 
-export default function DashboardPage() {
-  const { tenantId } = useTenant()
+export default function BoardPage() {
+  const router = useRouter()
+  const [win, setWin] = useState<AnalyticsWindow>('24h')
 
-  // Fetch analytics data
-  const { data: analytics, isLoading } = useQuery({
-    queryKey: ['analytics', tenantId],
-    queryFn: async () => {
-      if (!tenantId) {
-        throw new Error('Tenant ID is required')
-      }
-      const api = createClientAPI(tenantId)
-      const response = await api.get('/analytics')
-      return response.data as AnalyticsData
-    },
-    enabled: !!tenantId,
-    refetchInterval: 30000, // Refresh every 30 seconds
+  const analytics = useQuery({
+    queryKey: qk.analytics(win),
+    queryFn: () => analyticsApi.get(win),
+    refetchInterval: 20_000,
   })
+  const origins = useQuery({ queryKey: qk.origins, queryFn: originsApi.list })
+  const routes = useQuery({ queryKey: qk.routes, queryFn: routesApi.list })
 
-  const stats = analytics ? [
-    {
-      title: 'Total Requests',
-      value: formatNumber(analytics.total_requests),
-      icon: Activity,
-    },
-    {
-      title: 'Cache Hit Rate',
-      value: formatPercent(analytics.cache_hit_rate),
-      icon: TrendingUp,
-    },
-    {
-      title: 'Avg Response Time',
-      value: formatDuration(analytics.avg_response_time),
-      icon: Zap,
-    },
-    {
-      title: 'Error Rate',
-      value: formatPercent(analytics.error_rate),
-      icon: AlertCircle,
-    },
-  ] : []
+  const { left, right, cables } = useMemo(() => {
+    const os = origins.data ?? []
+    const rs = (routes.data ?? []).slice(0, 12)
+    const usedOrigins = new Set(rs.map((r) => r.origin_id))
+    const left: PatchJack[] = rs.map((r) => ({
+      id: r.id,
+      label: truncate(r.path_pattern, 22),
+      state: r.is_active ? 'on' : 'off',
+    }))
+    const right: PatchJack[] = os
+      .filter((o) => usedOrigins.has(o.id) || os.length <= 8)
+      .slice(0, 12)
+      .map((o) => ({
+        id: o.id,
+        label: truncate(o.name, 20),
+        state: o.is_healthy ? 'on' : 'off',
+      }))
+    const rightIds = new Set(right.map((j) => j.id))
+    const cables: PatchCable[] = rs
+      .filter((r) => rightIds.has(r.origin_id))
+      .map((r) => ({ from: r.id, to: r.origin_id, active: r.is_active, live: r.is_active }))
+    return { left, right, cables }
+  }, [origins.data, routes.data])
+
+  const t = analytics.data?.totals
+  const degraded = (origins.data ?? []).filter((o) => !o.is_healthy)
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight gradient-text">Dashboard Overview</h1>
-        <p className="text-muted-foreground mt-1">
-          Welcome back! Here's what's happening with your API gateway.
-        </p>
-      </div>
+    <div className="space-y-8">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">The board</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Every route patched through the exchange, and what crossed it{' '}
+            {win === '1h' ? 'this hour' : win === '24h' ? 'today' : `over ${win}`}.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
+            <span className="lamp lamp-on" />
+            {analytics.isFetching ? 'reading' : 'live'}
+          </span>
+          <WindowToggle value={win} onChange={setWin} />
+        </div>
+      </header>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {isLoading ? (
-          [1, 2, 3, 4].map((i) => (
-            <Card key={i} className="shimmer h-32" />
-          ))
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {analytics.isLoading || !t ? (
+          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[104px]" />)
         ) : (
-          stats.map((stat, i) => {
-            const Icon = stat.icon
-            
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.1 }}
-              >
-                <Card className="card-hover">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      {stat.title}
-                    </CardTitle>
-                    <Icon className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )
-          })
+          <>
+            <Stat label="Requests" value={formatCompact(t.total_requests)} accent="patch" />
+            <Stat
+              label="Error rate"
+              value={formatPercent(t.error_rate)}
+              accent={t.error_rate > 0.05 ? 'alert' : 'default'}
+              sub={`${formatCompact(Math.round(t.total_requests * t.error_rate))} failed`}
+            />
+            <Stat
+              label="p95 latency"
+              value={formatLatency(t.p95_latency_ms)}
+              accent="lamp"
+              sub={`avg ${formatLatency(t.avg_latency_ms)}`}
+            />
+            <Stat label="Cache hit rate" value={formatPercent(t.cache_hit_rate)} accent="lamp" />
+          </>
         )}
-      </div>
+      </section>
 
-      {/* Charts and Activity */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Request Overview */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Request Overview</CardTitle>
-            <CardDescription>Last 7 days</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
-              <div className="text-center space-y-2">
-                <Globe className="h-12 w-12 text-muted-foreground mx-auto" />
-                <p className="text-sm text-muted-foreground">
-                  Chart will be rendered here
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <section className="space-y-3">
+        <div className="eyebrow">switchboard</div>
+        {routes.isLoading || origins.isLoading ? (
+          <Skeleton className="h-[340px]" />
+        ) : cables.length === 0 ? (
+          <EmptyBoard hasRoutes={(routes.data ?? []).length > 0} />
+        ) : (
+          <Patchboard
+            left={left}
+            right={right}
+            cables={cables}
+            onSelect={(i) => {
+              const c = cables[i]
+              if (c) router.push(`/dashboard/routes?id=${c.from}`)
+            }}
+          />
+        )}
+      </section>
 
-        {/* Top Routes */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Routes</CardTitle>
-            <CardDescription>Most requested endpoints</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="h-[300px] shimmer" />
-            ) : analytics && analytics.top_routes && analytics.top_routes.length > 0 ? (
-              <div className="space-y-4">
-                {analytics.top_routes.slice(0, 4).map((route, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: i * 0.1 }}
-                    className="flex items-center justify-between p-3 rounded-lg border bg-accent/5 hover:bg-accent/10 transition-colors"
-                  >
-                    <div className="flex-1">
-                      <div className="font-mono text-sm font-medium">{route.path}</div>
-                      <div className="flex items-center space-x-4 mt-1">
-                        <span className="text-xs text-muted-foreground">
-                          {formatNumber(route.count)} requests
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDuration(route.avg_latency)}
-                        </span>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+      <section className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <div className="space-y-3">
+          <div className="eyebrow">throughput</div>
+          <div className="panel p-4">
+            {analytics.isLoading ? (
+              <Skeleton className="h-[240px]" />
+            ) : (analytics.data?.series ?? []).length === 0 ? (
+              <p className="grid h-[240px] place-content-center text-sm text-muted-foreground">
+                No traffic recorded yet.
+              </p>
             ) : (
-              <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
-                <div className="text-center space-y-2">
-                  <Route className="h-12 w-12 text-muted-foreground mx-auto" />
-                  <p className="text-sm text-muted-foreground">
-                    No route data available yet
-                  </p>
-                </div>
-              </div>
+              <ThroughputArea data={analytics.data!.series} />
             )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common tasks to get started</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <motion.a
-              href="/dashboard/services"
-              whileHover={{ scale: 1.02 }}
-              className="flex items-center space-x-3 p-4 rounded-lg border bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20 transition-all cursor-pointer group"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
-                <Server className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <div className="font-medium">Add Service</div>
-                <div className="text-xs text-muted-foreground">Configure origin</div>
-              </div>
-            </motion.a>
-
-            <motion.a
-              href="/dashboard/routes"
-              whileHover={{ scale: 1.02 }}
-              className="flex items-center space-x-3 p-4 rounded-lg border bg-gradient-to-br from-purple-500/5 to-purple-500/10 hover:from-purple-500/10 hover:to-purple-500/20 transition-all cursor-pointer group"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20 group-hover:bg-purple-500/30 transition-colors">
-                <Route className="h-5 w-5 text-purple-500" />
-              </div>
-              <div>
-                <div className="font-medium">Create Route</div>
-                <div className="text-xs text-muted-foreground">Add routing rule</div>
-              </div>
-            </motion.a>
-
-            <motion.a
-              href="/dashboard/api-keys"
-              whileHover={{ scale: 1.02 }}
-              className="flex items-center space-x-3 p-4 rounded-lg border bg-gradient-to-br from-green-500/5 to-green-500/10 hover:from-green-500/10 hover:to-green-500/20 transition-all cursor-pointer group"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/20 group-hover:bg-green-500/30 transition-colors">
-                <Key className="h-5 w-5 text-green-500" />
-              </div>
-              <div>
-                <div className="font-medium">Generate API Key</div>
-                <div className="text-xs text-muted-foreground">Create access token</div>
-              </div>
-            </motion.a>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        <div className="space-y-3">
+          <div className="eyebrow">busiest paths</div>
+          <div className="panel divide-y divide-border/70">
+            {(analytics.data?.top_routes ?? []).slice(0, 6).map((r) => (
+              <div key={r.path} className="ledger flex items-center justify-between gap-3 px-4 py-2.5 text-xs">
+                <span className="truncate text-foreground">{r.path}</span>
+                <span className="shrink-0 tabular-nums text-muted-foreground">
+                  {formatCompact(r.count)} · {formatLatency(r.avg_latency_ms)}
+                </span>
+              </div>
+            ))}
+            {(analytics.data?.top_routes ?? []).length === 0 && !analytics.isLoading && (
+              <p className="px-4 py-6 text-sm text-muted-foreground">Nothing has come through yet.</p>
+            )}
+            {analytics.isLoading && <Skeleton className="m-4 h-40" />}
+          </div>
+        </div>
+      </section>
+
+      {degraded.length > 0 && (
+        <section className="space-y-3">
+          <div className="eyebrow">attention</div>
+          <div className="panel border-destructive/40 p-4">
+            <p className="text-sm">
+              <span className="font-medium text-destructive">{degraded.length}</span>{' '}
+              {degraded.length === 1 ? 'origin is' : 'origins are'} failing health checks:{' '}
+              {degraded.map((o) => o.name).join(', ')}.{' '}
+              <a href="/dashboard/services" className="inline-flex items-center gap-0.5 text-patch hover:underline">
+                Open origins <ArrowUpRight className="h-3 w-3" />
+              </a>
+            </p>
+          </div>
+        </section>
+      )}
+    </div>
+  )
+}
+
+function EmptyBoard({ hasRoutes }: { hasRoutes: boolean }) {
+  return (
+    <div className="panel grid place-content-center gap-2 py-16 text-center">
+      <p className="text-sm text-foreground">The switchboard is unpatched.</p>
+      <p className="max-w-sm text-sm text-muted-foreground">
+        {hasRoutes
+          ? 'Your routes point at origins that are not in the pool yet.'
+          : 'Add an origin, then patch a route to it. Traffic follows the cable.'}
+      </p>
+      <div className="mt-2 flex justify-center gap-2 font-mono text-xs">
+        <a href="/dashboard/services" className="text-patch hover:underline">
+          + origin
+        </a>
+        <span className="text-border">·</span>
+        <a href="/dashboard/routes" className="text-patch hover:underline">
+          + route
+        </a>
+      </div>
     </div>
   )
 }
