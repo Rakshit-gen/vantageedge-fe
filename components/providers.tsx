@@ -16,12 +16,23 @@ function ApiAuthBridge() {
 
   useEffect(() => {
     const template = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE
-    bindAuth(
-      () => (template ? getToken({ template }) : getToken()),
-      () => {
-        signOut(() => router.push('/auth/sign-in'))
-      },
-    )
+    const fetchToken = async () => {
+      try {
+        return template ? await getToken({ template }) : await getToken()
+      } catch {
+        // A missing or misconfigured JWT template must not wedge every
+        // request — fall back to Clerk's default session token.
+        return getToken()
+      }
+    }
+    bindAuth(fetchToken, () => {
+      // A lone API 401 is usually a backend hiccup (Render cold start,
+      // clock skew, a token that expired mid-flight), not a dead session.
+      // Only sign out if Clerk itself no longer has one.
+      fetchToken().then((token) => {
+        if (!token) signOut(() => router.push('/auth/sign-in'))
+      })
+    })
   }, [getToken, signOut, router])
 
   return null
