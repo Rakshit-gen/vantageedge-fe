@@ -2,7 +2,8 @@
 
 The operator console for the [VantageEdge](https://github.com/rakshit-gen/vantageEdge)
 API gateway. You add origins, patch routes to them, set each route's policy
-(auth mode, rate limit, cache TTL), and watch traffic cross the board.
+(auth mode, load-balancing strategy, rate limit, cache TTL), and watch traffic
+cross the board.
 
 Design direction is **the exchange**: the gateway as a telephone switchboard.
 The signature element is a patchboard diagram (routes on the left, origins on
@@ -39,7 +40,7 @@ If your Clerk instance needs a JWT template for the backend audience, set
 | `/docs` | API reference |
 | `/dashboard` | The board: patchboard + traffic rollup |
 | `/dashboard/services` | Origins (dense table, inline edit, health) |
-| `/dashboard/routes` | Routes as signal paths, origin-pool editor in the drawer |
+| `/dashboard/routes` | Routes as signal paths, per-route load balancing, origin-pool editor in the drawer |
 | `/dashboard/api-keys` | Generate / revoke keys, one-time reveal |
 | `/dashboard/analytics` | Traffic: throughput, latency, status mix, cache, top routes |
 | `/dashboard/settings` | Tenant identity, delete-tenant danger zone |
