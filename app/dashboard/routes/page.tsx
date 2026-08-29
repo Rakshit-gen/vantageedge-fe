@@ -136,7 +136,7 @@ export default function RoutesPage() {
                     <span className="font-mono text-[11px] text-muted-foreground">
                       {r.methods.join(' ')}
                     </span>
-                    <span className="truncate font-mono text-sm text-foreground">{r.path_pattern}</span>
+                    <span className="min-w-0 break-all font-mono text-sm text-foreground">{r.path_pattern}</span>
                     <span className="patch-arrow">═▶</span>
                     <PolicyChips route={r} className="flex flex-wrap items-center gap-1" />
                     <span className="patch-arrow">═▶</span>

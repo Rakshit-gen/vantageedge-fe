@@ -265,10 +265,10 @@ function EndpointList({ rows }: { rows: [string, string, string][] }) {
   return (
     <div className="ledger overflow-hidden rounded border border-border text-xs">
       {rows.map(([verb, path, desc], i) => (
-        <div key={i} className="flex items-center gap-3 border-b border-border/70 px-3 py-2 last:border-0">
+        <div key={i} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border/70 px-3 py-2 last:border-0">
           <span className="w-16 shrink-0 uppercase text-patch">{verb}</span>
-          {path && <code className="shrink-0 text-foreground">{path}</code>}
-          <span className="text-muted-foreground">{desc}</span>
+          {path && <code className="min-w-0 break-all text-foreground">{path}</code>}
+          <span className="basis-full text-muted-foreground sm:basis-auto">{desc}</span>
         </div>
       ))}
     </div>

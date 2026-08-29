@@ -77,9 +77,9 @@ export function Patchboard({
         </span>
       </div>
 
-      <div className="grid grid-cols-[1fr_auto_1fr] gap-0">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-0">
         {/* left rail labels */}
-        <ul className="ledger flex flex-col justify-between py-4 pl-4 pr-2 text-xs" style={{ minHeight: H }}>
+        <ul className="ledger flex min-w-0 flex-col justify-between py-4 pl-3 pr-2 text-xs sm:pl-4" style={{ minHeight: H }}>
           {left.map((j) => (
             <li
               key={j.id}
@@ -91,7 +91,7 @@ export function Patchboard({
               )}
             >
               <span className={cn('lamp', j.state === 'warn' ? 'lamp-warn' : j.state === 'off' ? 'lamp-off' : 'lamp-on')} />
-              <span className="truncate text-foreground">{j.label}</span>
+              <span className="min-w-0 truncate text-foreground">{j.label}</span>
             </li>
           ))}
         </ul>
@@ -101,7 +101,7 @@ export function Patchboard({
           viewBox={`0 0 ${W} ${H}`}
           width="100%"
           preserveAspectRatio="none"
-          className="col-start-2 h-full min-w-[280px]"
+          className="col-start-2 h-full min-w-[160px] sm:min-w-[280px]"
           style={{ height: H }}
         >
           <defs>
@@ -182,7 +182,7 @@ export function Patchboard({
         </svg>
 
         {/* right rail labels */}
-        <ul className="ledger col-start-3 flex flex-col justify-between py-4 pl-2 pr-4 text-right text-xs" style={{ minHeight: H }}>
+        <ul className="ledger col-start-3 flex min-w-0 flex-col justify-between py-4 pl-2 pr-3 text-right text-xs sm:pr-4" style={{ minHeight: H }}>
           {right.map((j) => (
             <li
               key={j.id}
@@ -193,7 +193,7 @@ export function Patchboard({
                 hover && hover !== j.id && !cables.some((c) => c.to === hover && c.from === j.id) && 'opacity-40',
               )}
             >
-              <span className="truncate text-foreground">{j.label}</span>
+              <span className="min-w-0 truncate text-foreground">{j.label}</span>
               <span className={cn('lamp', j.state === 'warn' ? 'lamp-warn' : j.state === 'off' ? 'lamp-off' : 'lamp-on')} />
             </li>
           ))}

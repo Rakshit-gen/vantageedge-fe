@@ -120,14 +120,15 @@ export default function ExchangePage() {
               <Label className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
                 Type <span className="text-foreground">{tenant.subdomain}</span> to confirm
               </Label>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <Input
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                   placeholder={tenant.subdomain}
-                  className="max-w-xs"
+                  className="sm:max-w-xs"
                 />
                 <Button
+                  className="shrink-0"
                   variant="destructive"
                   disabled={confirm !== tenant.subdomain || destroy.isPending}
                   onClick={() =>

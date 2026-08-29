@@ -128,8 +128,8 @@ export function CommandMenuProvider({ children }: { children: React.ReactNode })
             <Command.Group heading="Routes" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:text-muted-foreground">
               {routes.map((r) => (
                 <Item key={r.id} icon={RouteIcon} onSelect={() => go(`/dashboard/routes?id=${r.id}`)}>
-                  <span>{r.name}</span>
-                  <span className="ml-auto font-mono text-xs text-muted-foreground">{r.path_pattern}</span>
+                  <span className="shrink-0">{r.name}</span>
+                  <span className="ml-auto truncate pl-2 font-mono text-xs text-muted-foreground">{r.path_pattern}</span>
                 </Item>
               ))}
             </Command.Group>
@@ -139,8 +139,8 @@ export function CommandMenuProvider({ children }: { children: React.ReactNode })
             <Command.Group heading="Origins" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:text-muted-foreground">
               {origins.map((o) => (
                 <Item key={o.id} icon={Server} onSelect={() => go(`/dashboard/services?id=${o.id}`)}>
-                  <span>{o.name}</span>
-                  <span className="ml-auto font-mono text-xs text-muted-foreground">{o.url}</span>
+                  <span className="shrink-0">{o.name}</span>
+                  <span className="ml-auto truncate pl-2 font-mono text-xs text-muted-foreground">{o.url}</span>
                 </Item>
               ))}
             </Command.Group>
@@ -163,7 +163,7 @@ function Item({
   return (
     <Command.Item
       onSelect={onSelect}
-      className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-foreground aria-selected:bg-accent"
+      className="flex cursor-pointer items-center gap-2.5 overflow-hidden rounded-md px-2.5 py-2 text-sm text-foreground aria-selected:bg-accent"
     >
       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
       {children}

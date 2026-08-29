@@ -157,12 +157,12 @@ export default function LandingPage() {
             <RequestSim />
             <ol className="space-y-0">
               {LIFECYCLE.map(([step, desc], i) => (
-                <li key={step} className="flex gap-4 border-b border-border/70 py-3 last:border-0">
+                <li key={step} className="flex flex-wrap gap-x-4 gap-y-1 border-b border-border/70 py-3 last:border-0">
                   <span className="ledger w-6 shrink-0 pt-0.5 text-xs text-muted-foreground">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <span className="w-20 shrink-0 font-display text-sm font-semibold">{step}</span>
-                  <span className="text-sm text-muted-foreground">{desc}</span>
+                  <span className="min-w-0 flex-1 basis-full text-sm text-muted-foreground sm:basis-0">{desc}</span>
                 </li>
               ))}
             </ol>
@@ -226,8 +226,8 @@ export default function LandingPage() {
           </div>
           <div className="ledger overflow-hidden rounded border border-border text-xs">
             {ENDPOINTS.map(([ep, desc]) => (
-              <div key={ep} className="flex items-center justify-between gap-4 border-b border-border/70 px-4 py-2.5 last:border-0">
-                <code className="whitespace-pre text-foreground">{ep}</code>
+              <div key={ep} className="flex flex-col gap-0.5 border-b border-border/70 px-4 py-2.5 last:border-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <code className="overflow-x-auto whitespace-pre text-foreground">{ep}</code>
                 <span className="shrink-0 text-muted-foreground">{desc}</span>
               </div>
             ))}

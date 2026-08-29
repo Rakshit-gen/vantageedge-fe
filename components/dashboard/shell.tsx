@@ -134,8 +134,8 @@ function ShellInner({ children }: { children: React.ReactNode }) {
           </button>
 
           <div className="ledger flex items-center gap-2 text-xs text-muted-foreground">
-            <span>the&nbsp;exchange</span>
-            <span className="text-border">/</span>
+            <span className="hidden sm:inline">the&nbsp;exchange</span>
+            <span className="hidden text-border sm:inline">/</span>
             <span className="text-foreground">{section?.name.toLowerCase() ?? 'board'}</span>
           </div>
 

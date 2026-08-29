@@ -18,7 +18,7 @@ export function CodeBlock({ code }: { code: string }) {
             setTimeout(() => setCopied(false), 1500)
           }
         }}
-        className="absolute right-2 top-2 rounded border border-border bg-background p-1.5 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
+        className="absolute right-2 top-2 rounded border border-border bg-background p-1.5 text-muted-foreground opacity-100 transition-opacity hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100"
         aria-label="Copy"
       >
         {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
