@@ -11,6 +11,13 @@ const AUTH_LABEL: Record<Route['auth_mode'], string> = {
   both: 'jwt + key',
 }
 
+const LB_LABEL: Record<Route['load_balancing'], string> = {
+  weighted: 'weighted',
+  round_robin: 'round robin',
+  least_conn: 'least conn',
+  ip_hash: 'ip sticky',
+}
+
 /**
  * The policy stamps on a route: how it's guarded, whether it's throttled,
  * whether responses are held, whether the breaker is armed. Read in order,
@@ -31,6 +38,10 @@ export function PolicyChips({ route, className }: { route: Route; className?: st
       ) : null}
 
       {route.cache_enabled ? <Badge variant="lamp">cache {route.cache_ttl_seconds}s</Badge> : null}
+
+      {route.load_balancing && route.load_balancing !== 'weighted' ? (
+        <Badge variant="outline">{LB_LABEL[route.load_balancing]}</Badge>
+      ) : null}
 
       {route.circuit_breaker_enabled ? (
         <Badge variant="warning">breaker {route.circuit_breaker_threshold}</Badge>

@@ -144,6 +144,7 @@ curl https://<host>/api/v1/routes \\
     "methods": ["GET", "POST"],
     "priority": 10,
     "auth_mode": "jwt_required",
+    "load_balancing": "round_robin",
     "is_active": true,
     "rate_limit_enabled": true,
     "rate_limit_requests_per_second": 50,
@@ -155,8 +156,11 @@ curl https://<host>/api/v1/routes \\
 
         <Section id="pool" title="Origin pools">
           <p>
-            Beyond its primary origin, a route can load-balance across a pool. Members are weighted and
-            health-checked like any origin.
+            Beyond its primary origin, a route can load-balance across a pool. Members are
+            health-checked like any origin. The route’s <Code>load_balancing</Code> picks how a request
+            is assigned: <Code>weighted</Code> (default, random by origin weight), <Code>round_robin</Code>,
+            <Code>least_conn</Code> (fewest in-flight requests), or <Code>ip_hash</Code> (a client IP
+            sticks to one origin).
           </p>
           <EndpointList
             rows={[

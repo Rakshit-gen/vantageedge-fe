@@ -17,7 +17,7 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { originsApi, routesApi, type RouteInput } from '@/lib/api/resources'
 import { qk, useOptimisticMutation } from '@/lib/hooks/use-resource'
-import type { AuthMode, Route } from '@/lib/types'
+import type { AuthMode, LoadBalancing, Route } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const
@@ -26,6 +26,12 @@ const AUTH_MODES: { value: AuthMode; label: string }[] = [
   { value: 'jwt_required', label: 'JWT required' },
   { value: 'apikey_required', label: 'API key required' },
   { value: 'both', label: 'JWT and API key' },
+]
+const LB_MODES: { value: LoadBalancing; label: string }[] = [
+  { value: 'weighted', label: 'Weighted random' },
+  { value: 'round_robin', label: 'Round robin' },
+  { value: 'least_conn', label: 'Least connections' },
+  { value: 'ip_hash', label: 'Sticky by client IP' },
 ]
 
 const blank = (originId: string): RouteInput => ({
@@ -43,6 +49,7 @@ const blank = (originId: string): RouteInput => ({
   cache_enabled: false,
   cache_ttl_seconds: 60,
   cache_key_pattern: '',
+  load_balancing: 'weighted',
   timeout_seconds: 30,
   retry_attempts: 0,
 })
@@ -77,6 +84,7 @@ export function AddRouteDialog({
         cache_enabled: route.cache_enabled,
         cache_ttl_seconds: route.cache_ttl_seconds,
         cache_key_pattern: route.cache_key_pattern || '',
+        load_balancing: route.load_balancing || 'weighted',
         timeout_seconds: route.timeout_seconds,
         retry_attempts: route.retry_attempts,
       })
@@ -185,6 +193,21 @@ export function AddRouteDialog({
               />
             </Field>
           </div>
+
+          <Field label="Load balancing">
+            <Select value={form.load_balancing} onValueChange={(v) => set('load_balancing', v as LoadBalancing)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LB_MODES.map((m) => (
+                  <SelectItem key={m.value} value={m.value}>
+                    {m.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
 
           <Toggle
             label="Active"

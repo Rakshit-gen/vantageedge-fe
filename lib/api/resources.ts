@@ -5,6 +5,7 @@ import type {
   APIKey,
   APIKeyWithSecret,
   AuthMode,
+  LoadBalancing,
   Origin,
   Route,
   Tenant,
@@ -39,6 +40,7 @@ export interface RouteInput {
   cache_enabled: boolean
   cache_ttl_seconds: number
   cache_key_pattern: string
+  load_balancing: LoadBalancing
   timeout_seconds: number
   retry_attempts: number
 }

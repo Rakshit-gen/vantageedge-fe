@@ -4,6 +4,7 @@
 
 export type Role = 'owner' | 'admin' | 'member' | 'viewer'
 export type AuthMode = 'public' | 'jwt_required' | 'apikey_required' | 'both'
+export type LoadBalancing = 'weighted' | 'round_robin' | 'least_conn' | 'ip_hash'
 
 export interface Tenant {
   id: string
@@ -64,6 +65,8 @@ export interface Route {
   cache_enabled: boolean
   cache_ttl_seconds: number
   cache_key_pattern: string
+
+  load_balancing: LoadBalancing
 
   timeout_seconds: number
   retry_attempts: number

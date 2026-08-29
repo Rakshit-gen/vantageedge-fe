@@ -259,6 +259,7 @@ export default function RoutesPage() {
                 />
               </Row>
               <Row k="Auth">{drawerRoute.auth_mode}</Row>
+              <Row k="Balancing">{drawerRoute.load_balancing || 'weighted'}</Row>
               <Row k="Timeout">{drawerRoute.timeout_seconds}s</Row>
               <Row k="Retries">{drawerRoute.retry_attempts}</Row>
               <Row k="ID">{drawerRoute.id}</Row>
