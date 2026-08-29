@@ -218,14 +218,22 @@ curl https://<host>/api/v1/routes \\
 
         <Section id="auth-modes" title="Auth modes">
           <p>Set per route, in <Code>auth_mode</Code>:</p>
-          <EndpointList
-            rows={[
-              ['public', '', 'No authentication. Anyone can call it.'],
-              ['jwt_required', '', 'A valid Clerk JWT must be present.'],
-              ['apikey_required', '', 'A valid X-API-Key must be present.'],
-              ['both', '', 'JWT and API key both required.'],
-            ]}
-          />
+          <dl className="ledger overflow-hidden rounded border border-border text-xs">
+            {[
+              ['public', 'No authentication. Anyone can call it.'],
+              ['jwt_required', 'A valid Clerk JWT must be present.'],
+              ['apikey_required', 'A valid X-API-Key must be present.'],
+              ['both', 'Both a JWT and an X-API-Key must be present.'],
+            ].map(([mode, desc]) => (
+              <div
+                key={mode}
+                className="flex flex-col gap-0.5 border-b border-border/70 px-3 py-2 last:border-0 sm:flex-row sm:gap-4"
+              >
+                <dt className="shrink-0 text-patch sm:w-36">{mode}</dt>
+                <dd className="text-muted-foreground">{desc}</dd>
+              </div>
+            ))}
+          </dl>
         </Section>
 
         <div className="mt-16 border-t border-border pt-8">
