@@ -3,6 +3,9 @@ import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { SignedIn, SignedOut } from '@clerk/nextjs'
 import { Patchboard } from '@/components/patchboard'
 import { PanelField } from '@/components/panel-field'
+import { BoardReadout } from '@/components/board-readout'
+import { Reveal } from '@/components/reveal'
+import { CapabilityGlyph, type GlyphName } from '@/components/capability-glyph'
 import { RequestSim } from '@/components/request-sim'
 import { ConsoleCta } from '@/components/console-cta'
 
@@ -37,35 +40,41 @@ const LIFECYCLE = [
   ['Log', 'Status, latency, cache and limit outcome land in the request log.'],
 ]
 
-const CAPABILITIES = [
+const CAPABILITIES: { title: string; glyph: GlyphName; body: string; detail: string }[] = [
   {
     title: 'Weighted origin pools',
-    body: 'Give a route more than one backend and a weight for each. Health checks run on an interval; an origin that fails them is pulled from rotation until it recovers, and traffic re-splits across what is left.',
+    glyph: 'pools',
+    body: 'Many backends per route, each with a weight. A failed health check pulls an origin and traffic re-splits across the rest.',
     detail: 'weight · health_check_path · interval · timeout · retries',
   },
   {
     title: 'Per-route rate limiting',
-    body: 'A token bucket per route: a sustained rate in requests per second and a burst allowance on top. Keyed by client IP, so one noisy caller does not spend everyone else’s budget.',
+    glyph: 'ratelimit',
+    body: 'A token bucket per route: sustained rate plus burst, keyed by client IP so one noisy caller can’t spend everyone’s budget.',
     detail: 'requests_per_second · burst · key = ip',
   },
   {
     title: 'Response cache',
-    body: 'Turn on caching for a route and successful GETs are held in Redis for the TTL you set. The hit rate shows up on the board; invalidation happens when the TTL runs out.',
+    glyph: 'cache',
+    body: 'Cache a route and successful GETs are held in Redis for your TTL. The hit rate shows on the board.',
     detail: 'cache_enabled · cache_ttl_seconds',
   },
   {
     title: 'Config that applies live',
-    body: 'The console writes to the control plane; the gateway picks the change up and applies it. Patch a route, change a weight, revoke a key: no deploy, no restart, no waiting on a cron.',
+    glyph: 'live',
+    body: 'The console writes to the control plane; the gateway picks it up in seconds. No deploy, no restart.',
     detail: 'control plane → gateway, in seconds',
   },
   {
     title: 'Request-log analytics',
-    body: 'Every request the gateway handles is logged with its status, latency, and whether it hit cache or a limit. The Traffic panel rolls that up: throughput, p95, status mix, cache hit rate, busiest paths.',
+    glyph: 'analytics',
+    body: 'Every request is logged with status, latency, and cache or limit outcome. Traffic rolls it up: throughput, p95, status mix, busiest paths.',
     detail: 'GET /api/v1/analytics?window=1h|24h|7d|30d',
   },
   {
     title: 'Auth without building it',
-    body: 'Sessions are Clerk; the gateway verifies the JWT. For machine callers, issue an API key with read / write / admin scopes and an optional expiry. Each route picks which it accepts.',
+    glyph: 'auth',
+    body: 'Clerk JWT for people, scoped API keys for machines. Each route picks which it accepts.',
     detail: 'public · jwt_required · apikey_required · both',
   },
 ]
@@ -126,19 +135,19 @@ export default function LandingPage() {
           }}
         />
         <div className="relative mx-auto min-h-[500px] max-w-5xl px-5 pb-24 pt-20 sm:min-h-[560px] sm:pt-28">
-          <p className="eyebrow after:hidden">API gateway · control plane</p>
+          <p className="eyebrow rise-1 after:hidden">API gateway · control plane</p>
           <h1
-            className="mt-4 max-w-2xl font-display text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl"
+            className="rise-2 mt-4 max-w-2xl font-display text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl"
             style={{ textShadow: '0 2px 22px hsl(var(--background) / 0.85)' }}
           >
             One switchboard for every API you put behind it.
           </h1>
-          <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+          <p className="rise-3 mt-5 max-w-xl text-lg text-muted-foreground">
             VantageEdge sits in front of your services and patches each incoming path to a backend. Along
             the way it checks auth, holds a rate limit, serves from cache when it can, and writes down
             what happened. You wire it from one console.
           </p>
-          <div className="mt-7 flex flex-wrap gap-3">
+          <div className="rise-4 mt-7 flex flex-wrap gap-3">
             <ConsoleCta />
             <Link
               href="/docs"
@@ -152,16 +161,21 @@ export default function LandingPage() {
 
       {/* the board */}
       <section className="mx-auto max-w-5xl px-5 py-14">
-        <Patchboard left={SAMPLE_LEFT} right={SAMPLE_RIGHT} cables={SAMPLE_CABLES} height={300} />
-        <p className="ledger mt-2 text-[11px] text-muted-foreground">
-          An example board. Left: paths you expose. Right: backends in the pool. Each cable is a route;
-          hover one to trace it.
-        </p>
+        <Reveal>
+          <Patchboard left={SAMPLE_LEFT} right={SAMPLE_RIGHT} cables={SAMPLE_CABLES} height={300} />
+          <p className="ledger mt-2 text-[11px] text-muted-foreground">
+            An example board. Left: paths you expose. Right: backends in the pool. Each cable is a route;
+            hover one to trace it.
+          </p>
+        </Reveal>
+        <Reveal delay={0.08} className="mt-5">
+          <BoardReadout />
+        </Reveal>
       </section>
 
       {/* lifecycle — interactive */}
       <section className="border-y border-border bg-card/40">
-        <div className="mx-auto max-w-5xl px-5 py-14">
+        <Reveal className="mx-auto max-w-5xl px-5 py-14">
           <h2 className="font-display text-2xl font-semibold tracking-tight">What one request goes through</h2>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             The gateway runs these in order, each configured per route. Flip the switches and send one
@@ -182,26 +196,31 @@ export default function LandingPage() {
               ))}
             </ol>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* capabilities */}
       <section className="mx-auto max-w-5xl px-5 py-16">
         <h2 className="font-display text-2xl font-semibold tracking-tight">What it does</h2>
         <div className="mt-8 grid gap-px overflow-hidden rounded border border-border bg-border sm:grid-cols-2">
-          {CAPABILITIES.map((c) => (
-            <div key={c.title} className="flex flex-col gap-3 bg-background p-5">
+          {CAPABILITIES.map((c, i) => (
+            <Reveal
+              key={c.title}
+              delay={(i % 2) * 0.06 + Math.floor(i / 2) * 0.04}
+              className="flex flex-col gap-3 bg-background p-5"
+            >
+              <CapabilityGlyph name={c.glyph} />
               <h3 className="font-display text-lg font-semibold">{c.title}</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">{c.body}</p>
               <p className="ledger mt-auto pt-1 text-[11px] text-muted-foreground/80">{c.detail}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* setup */}
       <section className="border-y border-border bg-card/40">
-        <div className="mx-auto max-w-5xl px-5 py-14">
+        <Reveal className="mx-auto max-w-5xl px-5 py-14">
           <h2 className="font-display text-2xl font-semibold tracking-tight">Setting one up</h2>
           <ol className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[
@@ -219,12 +238,12 @@ export default function LandingPage() {
               </li>
             ))}
           </ol>
-        </div>
+        </Reveal>
       </section>
 
       {/* api surface */}
       <section className="mx-auto max-w-5xl px-5 py-16">
-        <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr]">
+        <Reveal className="grid gap-10 lg:grid-cols-[1fr_1.1fr]">
           <div>
             <h2 className="font-display text-2xl font-semibold tracking-tight">The API</h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
@@ -247,12 +266,12 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* good to know */}
       <section className="border-t border-border bg-card/40">
-        <div className="mx-auto max-w-5xl px-5 py-14">
+        <Reveal className="mx-auto max-w-5xl px-5 py-14">
           <h2 className="font-display text-2xl font-semibold tracking-tight">Good to know</h2>
           <dl className="mt-8 grid gap-6 sm:grid-cols-2">
             {[
@@ -267,17 +286,19 @@ export default function LandingPage() {
               </div>
             ))}
           </dl>
-        </div>
+        </Reveal>
       </section>
 
       <section className="mx-auto max-w-5xl px-5 py-20 text-center">
-        <h2 className="font-display text-3xl font-semibold tracking-tight">Put something behind it.</h2>
-        <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-          Add one origin, patch one route, and watch the first request cross the board.
-        </p>
-        <div className="mt-6 flex justify-center">
-          <ConsoleCta size="lg" />
-        </div>
+        <Reveal>
+          <h2 className="font-display text-3xl font-semibold tracking-tight">Put something behind it.</h2>
+          <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
+            Add one origin, patch one route, and watch the first request cross the board.
+          </p>
+          <div className="mt-6 flex justify-center">
+            <ConsoleCta size="lg" />
+          </div>
+        </Reveal>
       </section>
 
       <footer className="border-t border-border">
