@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { SignedIn, SignedOut } from '@clerk/nextjs'
 import { Patchboard } from '@/components/patchboard'
+import { PanelField } from '@/components/panel-field'
 import { RequestSim } from '@/components/request-sim'
 import { ConsoleCta } from '@/components/console-cta'
 
@@ -115,33 +116,47 @@ export default function LandingPage() {
       </header>
 
       {/* hero */}
-      <section className="mx-auto max-w-5xl px-5 pb-16 pt-14 sm:pt-20">
-        <p className="eyebrow after:hidden">API gateway · control plane</p>
-        <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl">
-          One switchboard for every API you put behind it.
-        </h1>
-        <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-          VantageEdge sits in front of your services and patches each incoming path to a backend. Along the
-          way it checks auth, holds a rate limit, serves from cache when it can, and writes down what
-          happened. You wire it from one console.
-        </p>
-        <div className="mt-7 flex flex-wrap gap-3">
-          <ConsoleCta />
-          <Link
-            href="/docs"
-            className="inline-flex items-center gap-2 rounded border border-border px-4 py-2 text-sm text-foreground hover:bg-accent"
+      <section className="relative overflow-hidden border-b border-border">
+        <PanelField className="pointer-events-none absolute inset-0 h-full w-full" />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(58% 78% at 30% 60%, hsl(var(--background) / 0.82), transparent 100%)',
+          }}
+        />
+        <div className="relative mx-auto min-h-[500px] max-w-5xl px-5 pb-24 pt-20 sm:min-h-[560px] sm:pt-28">
+          <p className="eyebrow after:hidden">API gateway · control plane</p>
+          <h1
+            className="mt-4 max-w-2xl font-display text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl"
+            style={{ textShadow: '0 2px 22px hsl(var(--background) / 0.85)' }}
           >
-            Read the docs
-          </Link>
-        </div>
-
-        <div className="mt-12">
-          <Patchboard left={SAMPLE_LEFT} right={SAMPLE_RIGHT} cables={SAMPLE_CABLES} height={300} />
-          <p className="ledger mt-2 text-[11px] text-muted-foreground">
-            An example board. Left: paths you expose. Right: backends in the pool. Each cable is a
-            route; hover one to trace it.
+            One switchboard for every API you put behind it.
+          </h1>
+          <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+            VantageEdge sits in front of your services and patches each incoming path to a backend. Along
+            the way it checks auth, holds a rate limit, serves from cache when it can, and writes down
+            what happened. You wire it from one console.
           </p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <ConsoleCta />
+            <Link
+              href="/docs"
+              className="inline-flex items-center gap-2 rounded border border-border bg-background/40 px-4 py-2 text-sm text-foreground backdrop-blur hover:bg-accent"
+            >
+              Read the docs
+            </Link>
+          </div>
         </div>
+      </section>
+
+      {/* the board */}
+      <section className="mx-auto max-w-5xl px-5 py-14">
+        <Patchboard left={SAMPLE_LEFT} right={SAMPLE_RIGHT} cables={SAMPLE_CABLES} height={300} />
+        <p className="ledger mt-2 text-[11px] text-muted-foreground">
+          An example board. Left: paths you expose. Right: backends in the pool. Each cable is a route;
+          hover one to trace it.
+        </p>
       </section>
 
       {/* lifecycle — interactive */}
