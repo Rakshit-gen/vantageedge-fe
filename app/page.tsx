@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
-import { SignedIn, SignedOut } from '@clerk/nextjs'
+import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { Patchboard } from '@/components/patchboard'
 import { PanelField } from '@/components/panel-field'
 import { BoardReadout } from '@/components/board-readout'
@@ -119,6 +119,12 @@ export default function LandingPage() {
               >
                 Open console <ArrowRight className="h-3.5 w-3.5" />
               </Link>
+              <span className="ml-2 flex items-center">
+                <UserButton
+                  afterSignOutUrl="/"
+                  appearance={{ elements: { avatarBox: 'h-7 w-7 rounded-[3px]' } }}
+                />
+              </span>
             </SignedIn>
           </nav>
         </div>

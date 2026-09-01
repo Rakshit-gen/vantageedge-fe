@@ -58,10 +58,13 @@ function ShellInner({ children }: { children: React.ReactNode }) {
           railOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
-        <div className="flex h-12 items-center gap-2 border-b border-border px-4">
+        <Link
+          href="/"
+          className="flex h-12 items-center gap-2 border-b border-border px-4 text-foreground transition-colors hover:text-patch"
+        >
           <span className="h-2 w-2 rounded-full bg-patch" />
           <span className="font-display text-sm font-semibold tracking-tight">VantageEdge</span>
-        </div>
+        </Link>
 
         <nav className="flex-1 py-3">
           {NAV.map((item, i) => {
