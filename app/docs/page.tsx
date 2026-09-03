@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { CodeBlock } from '@/components/code-block'
 import { DocsNav } from '@/components/docs-nav'
+import { RequestSim } from '@/components/request-sim'
 
 export const metadata = {
   title: 'VantageEdge · docs',
@@ -72,6 +73,12 @@ Authorization: Bearer <clerk session jwt>`}
             If your Clerk instance needs a JWT template for the backend audience, set{' '}
             <Code>NEXT_PUBLIC_CLERK_JWT_TEMPLATE</Code> and the console mints the token with it.
           </Callout>
+          <div className="not-prose pt-2">
+            <p className="mb-2 text-xs text-muted-foreground">
+              Send a few requests through the pipeline. Toggle the cache and auth to see where each one stops.
+            </p>
+            <RequestSim />
+          </div>
         </Section>
 
         <Section id="auth" title="Authentication">
