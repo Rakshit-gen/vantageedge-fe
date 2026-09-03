@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { CodeBlock } from '@/components/code-block'
+import { DocsConfig, HostBar, DocsCode } from '@/components/docs-config'
 import { DocsNav } from '@/components/docs-nav'
 import { RequestSim } from '@/components/request-sim'
 
@@ -44,7 +44,10 @@ export default function DocsPage() {
           each other, so a change here applies at the edge within seconds.
         </p>
 
-        <div className="mt-10 lg:grid lg:grid-cols-[150px_1fr] lg:gap-12">
+        <DocsConfig>
+        <div className="mt-10">
+        <HostBar />
+        <div className="lg:grid lg:grid-cols-[150px_1fr] lg:gap-12">
           <div className="sticky top-14 z-20 -mx-5 border-y border-border bg-background/90 px-5 py-3 backdrop-blur lg:top-20 lg:mx-0 lg:self-start lg:border-0 lg:bg-transparent lg:p-0">
             <DocsNav sections={SECTIONS} />
           </div>
@@ -62,7 +65,7 @@ export default function DocsPage() {
             JWT. The tenant is resolved from the token; you never pass a tenant id. On your first
             authenticated call, a tenant is provisioned for you automatically.
           </p>
-          <CodeBlock
+          <DocsCode
             code={`# base URL
 https://<your-control-plane-host>/api/v1
 
@@ -87,7 +90,7 @@ Authorization: Bearer <clerk session jwt>`}
             <Code>Authorization: Bearer &lt;jwt&gt;</Code> automatically. Machines use an API key in the{' '}
             <Code>X-API-Key</Code> header, issued from the Keys panel with the scopes it needs.
           </p>
-          <CodeBlock
+          <DocsCode
             code={`# session (what the console sends)
 curl https://<host>/api/v1/routes \\
   -H "Authorization: Bearer $CLERK_JWT"
@@ -109,7 +112,7 @@ curl https://<host>/api/v1/routes \\
               ['DELETE', '/origins/{id}', 'Remove'],
             ]}
           />
-          <CodeBlock
+          <DocsCode
             code={`curl -X POST https://<host>/api/v1/origins \\
   -H "Authorization: Bearer $CLERK_JWT" \\
   -H "Content-Type: application/json" \\
@@ -139,7 +142,7 @@ curl https://<host>/api/v1/routes \\
               ['DELETE', '/routes/{id}', 'Remove'],
             ]}
           />
-          <CodeBlock
+          <DocsCode
             code={`curl -X POST https://<host>/api/v1/routes \\
   -H "Authorization: Bearer $CLERK_JWT" \\
   -H "Content-Type: application/json" \\
@@ -189,7 +192,7 @@ curl https://<host>/api/v1/routes \\
               ['DELETE', '/api-keys/{id}', 'Revoke'],
             ]}
           />
-          <CodeBlock
+          <DocsCode
             code={`curl -X POST https://<host>/api/v1/api-keys \\
   -H "Authorization: Bearer $CLERK_JWT" \\
   -H "Content-Type: application/json" \\
@@ -204,7 +207,7 @@ curl https://<host>/api/v1/routes \\
             <Code>24h</Code>, daily beyond that.
           </p>
           <EndpointList rows={[['GET', '/analytics?window=1h|24h|7d|30d', 'Traffic rollup']]} />
-          <CodeBlock
+          <DocsCode
             code={`curl "https://<host>/api/v1/analytics?window=24h" \\
   -H "Authorization: Bearer $CLERK_JWT"
 
@@ -253,6 +256,8 @@ curl https://<host>/api/v1/routes \\
         </div>
           </div>
         </div>
+        </div>
+        </DocsConfig>
       </div>
     </div>
   )
