@@ -4,6 +4,7 @@ import { DocsConfig, HostBar, DocsCode } from '@/components/docs-config'
 import { DocsNav } from '@/components/docs-nav'
 import { RequestSim } from '@/components/request-sim'
 import { Endpoints } from '@/components/docs-endpoints'
+import { AuthModes } from '@/components/docs-auth-modes'
 
 export const metadata = {
   title: 'VantageEdge · docs',
@@ -303,23 +304,8 @@ const { totals, series, top_routes } = await res.json()`}
         </Section>
 
         <Section id="auth-modes" title="Auth modes">
-          <p>Set per route, in <Code>auth_mode</Code>:</p>
-          <dl className="ledger overflow-hidden rounded border border-border text-xs">
-            {[
-              ['public', 'No authentication. Anyone can call it.'],
-              ['jwt_required', 'A valid Clerk JWT must be present.'],
-              ['apikey_required', 'A valid X-API-Key must be present.'],
-              ['both', 'Both a JWT and an X-API-Key must be present.'],
-            ].map(([mode, desc]) => (
-              <div
-                key={mode}
-                className="flex flex-col gap-0.5 border-b border-border/70 px-3 py-2 last:border-0 sm:flex-row sm:gap-4"
-              >
-                <dt className="shrink-0 text-patch sm:w-36">{mode}</dt>
-                <dd className="text-muted-foreground">{desc}</dd>
-              </div>
-            ))}
-          </dl>
+          <p>Set per route, in <Code>auth_mode</Code>. Pick one to see what a caller has to send:</p>
+          <AuthModes />
         </Section>
 
         <div className="mt-16 border-t border-border pt-8">
