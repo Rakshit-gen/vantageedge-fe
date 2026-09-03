@@ -5,6 +5,7 @@ import { DocsNav } from '@/components/docs-nav'
 import { RequestSim } from '@/components/request-sim'
 import { Endpoints } from '@/components/docs-endpoints'
 import { AuthModes } from '@/components/docs-auth-modes'
+import { ReadingProgress } from '@/components/reading-progress'
 
 export const metadata = {
   title: 'VantageEdge · docs',
@@ -25,6 +26,7 @@ const SECTIONS = [
 export default function DocsPage() {
   return (
     <div className="min-h-screen">
+      <ReadingProgress />
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-4xl items-center gap-4 px-5">
           <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
