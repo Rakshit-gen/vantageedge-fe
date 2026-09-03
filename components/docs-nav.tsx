@@ -31,6 +31,7 @@ export function DocsNav({ sections }: { sections: string[][] }) {
 
   return (
     <nav className="ledger flex gap-x-4 gap-y-1 overflow-x-auto pb-0.5 lg:flex-col lg:gap-1 lg:overflow-visible lg:pb-0">
+      <span className="eyebrow mb-2 hidden after:hidden lg:flex">on this page</span>
       {sections.map(([id, label]) => (
         <a
           key={id}
