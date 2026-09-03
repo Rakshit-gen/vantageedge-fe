@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { DocsConfig, HostBar, DocsCode } from '@/components/docs-config'
 import { DocsNav } from '@/components/docs-nav'
 import { RequestSim } from '@/components/request-sim'
+import { Endpoints } from '@/components/docs-endpoints'
 
 export const metadata = {
   title: 'VantageEdge · docs',
@@ -103,13 +104,13 @@ curl https://<host>/api/v1/routes \\
 
         <Section id="origins" title="Origins">
           <p>An origin is a backend the gateway can forward to. Health checks run on the interval you set; a failing origin is taken out of rotation until it passes again.</p>
-          <EndpointList
+          <Endpoints
             rows={[
-              ['GET', '/origins', 'List origins'],
-              ['POST', '/origins', 'Create an origin'],
-              ['GET', '/origins/{id}', 'Fetch one'],
-              ['PATCH', '/origins/{id}', 'Update fields'],
-              ['DELETE', '/origins/{id}', 'Remove'],
+              { verb: 'GET', path: '/origins', desc: 'List origins', note: 'Every origin for your tenant, newest first.' },
+              { verb: 'POST', path: '/origins', desc: 'Create an origin', note: 'url is required and must be absolute. Health checks start immediately; the origin is unhealthy until the first probe passes.' },
+              { verb: 'GET', path: '/origins/{id}', desc: 'Fetch one', note: '404 if the id belongs to another tenant.' },
+              { verb: 'PATCH', path: '/origins/{id}', desc: 'Update fields', note: 'Partial update: only the fields you send change. A new interval is picked up on the next health-check cycle.' },
+              { verb: 'DELETE', path: '/origins/{id}', desc: 'Remove', note: 'Fails while the origin is still a member of any route pool. Remove it from the pools first.' },
             ]}
           />
           <DocsCode
@@ -133,13 +134,13 @@ curl https://<host>/api/v1/routes \\
             A route binds a path pattern to an origin and carries its policy: methods, priority, auth mode,
             rate limit, cache. Higher <Code>priority</Code> wins when patterns overlap.
           </p>
-          <EndpointList
+          <Endpoints
             rows={[
-              ['GET', '/routes', 'List routes'],
-              ['POST', '/routes', 'Create a route'],
-              ['GET', '/routes/{id}', 'Fetch one'],
-              ['PATCH', '/routes/{id}', 'Update fields'],
-              ['DELETE', '/routes/{id}', 'Remove'],
+              { verb: 'GET', path: '/routes', desc: 'List routes', note: 'Ordered by priority, highest first, which is also the order they are matched in.' },
+              { verb: 'POST', path: '/routes', desc: 'Create a route', note: 'origin_id is required and must be one of your origins. path_pattern takes a trailing /* wildcard.' },
+              { verb: 'GET', path: '/routes/{id}', desc: 'Fetch one', note: 'Includes the resolved pool members.' },
+              { verb: 'PATCH', path: '/routes/{id}', desc: 'Update fields', note: 'Partial update. Toggling is_active takes effect at the edge within seconds.' },
+              { verb: 'DELETE', path: '/routes/{id}', desc: 'Remove', note: 'Drops the route and its pool bindings. The origins themselves are left alone.' },
             ]}
           />
           <DocsCode
@@ -171,11 +172,11 @@ curl https://<host>/api/v1/routes \\
             <Code>least_conn</Code> (fewest in-flight requests), or <Code>ip_hash</Code> (a client IP
             sticks to one origin).
           </p>
-          <EndpointList
+          <Endpoints
             rows={[
-              ['GET', '/routes/{id}/origins', 'List the pool'],
-              ['POST', '/routes/{id}/origins/{origin_id}', 'Add to the pool'],
-              ['DELETE', '/routes/{id}/origins/{origin_id}', 'Remove from the pool'],
+              { verb: 'GET', path: '/routes/{id}/origins', desc: 'List the pool', note: "The route's load-balancing pool, including its primary origin." },
+              { verb: 'POST', path: '/routes/{id}/origins/{origin_id}', desc: 'Add to the pool', note: 'Adds an existing origin. Its weight comes from the origin record; change it there.' },
+              { verb: 'DELETE', path: '/routes/{id}/origins/{origin_id}', desc: 'Remove from the pool', note: "You cannot remove the route's primary origin this way; repoint the route instead." },
             ]}
           />
         </Section>
@@ -185,11 +186,11 @@ curl https://<host>/api/v1/routes \\
             Keys authenticate machine callers. The secret is returned once, on creation. Scopes are{' '}
             <Code>read</Code>, <Code>write</Code>, <Code>admin</Code>; expiry is optional.
           </p>
-          <EndpointList
+          <Endpoints
             rows={[
-              ['GET', '/api-keys', 'List keys'],
-              ['POST', '/api-keys', 'Generate a key'],
-              ['DELETE', '/api-keys/{id}', 'Revoke'],
+              { verb: 'GET', path: '/api-keys', desc: 'List keys', note: 'Metadata only, never the secret: key_prefix, scopes, usage_count, last_used_at, expires_at.' },
+              { verb: 'POST', path: '/api-keys', desc: 'Generate a key', note: 'The full key is in the response once and is never retrievable again. Store it now.' },
+              { verb: 'DELETE', path: '/api-keys/{id}', desc: 'Revoke', note: 'Immediate. In-flight requests using the key finish; the next one gets 401.' },
             ]}
           />
           <DocsCode
@@ -206,7 +207,16 @@ curl https://<host>/api/v1/routes \\
             A rollup of the request log for a time window. Buckets are hourly for <Code>1h</Code> and{' '}
             <Code>24h</Code>, daily beyond that.
           </p>
-          <EndpointList rows={[['GET', '/analytics?window=1h|24h|7d|30d', 'Traffic rollup']]} />
+          <Endpoints
+            rows={[
+              {
+                verb: 'GET',
+                path: '/analytics?window=1h|24h|7d|30d',
+                desc: 'Traffic rollup',
+                note: 'window is one of 1h, 24h, 7d, 30d; anything else is a 400. Buckets are hourly up to 24h, daily beyond. Reads straight from the request log, so it reflects the last few seconds.',
+              },
+            ]}
+          />
           <DocsCode
             code={`curl "https://<host>/api/v1/analytics?window=24h" \\
   -H "Authorization: Bearer $CLERK_JWT"
@@ -286,16 +296,3 @@ function Callout({ children }: { children: React.ReactNode }) {
   )
 }
 
-function EndpointList({ rows }: { rows: [string, string, string][] }) {
-  return (
-    <div className="ledger overflow-hidden rounded border border-border text-xs">
-      {rows.map(([verb, path, desc], i) => (
-        <div key={i} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border/70 px-3 py-2 last:border-0">
-          <span className="w-16 shrink-0 uppercase text-patch">{verb}</span>
-          {path && <code className="min-w-0 break-all text-foreground">{path}</code>}
-          <span className="basis-full text-muted-foreground sm:basis-auto">{desc}</span>
-        </div>
-      ))}
-    </div>
-  )
-}
