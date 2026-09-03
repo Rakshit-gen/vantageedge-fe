@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { CodeBlock } from '@/components/code-block'
+import { DocsNav } from '@/components/docs-nav'
 
 export const metadata = {
   title: 'VantageEdge · docs',
@@ -22,7 +23,7 @@ export default function DocsPage() {
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-3xl items-center gap-4 px-5">
+        <div className="mx-auto flex h-14 max-w-4xl items-center gap-4 px-5">
           <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> VantageEdge
           </Link>
@@ -35,21 +36,19 @@ export default function DocsPage() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl px-5 py-12">
+      <div className="mx-auto max-w-4xl px-5 py-12">
         <h1 className="font-display text-3xl font-semibold tracking-tight">Documentation</h1>
-        <p className="mt-3 text-muted-foreground">
+        <p className="mt-3 max-w-2xl text-muted-foreground">
           The gateway forwards requests; the control plane API configures it. Both are one call away from
           each other, so a change here applies at the edge within seconds.
         </p>
 
-        <nav className="ledger mt-8 flex flex-wrap gap-x-4 gap-y-1 border-y border-border py-3 text-xs">
-          {SECTIONS.map(([id, label]) => (
-            <a key={id} href={`#${id}`} className="text-muted-foreground hover:text-foreground">
-              {label}
-            </a>
-          ))}
-        </nav>
+        <div className="mt-10 lg:grid lg:grid-cols-[150px_1fr] lg:gap-12">
+          <div className="sticky top-14 z-20 -mx-5 border-y border-border bg-background/90 px-5 py-3 backdrop-blur lg:top-20 lg:mx-0 lg:self-start lg:border-0 lg:bg-transparent lg:p-0">
+            <DocsNav sections={SECTIONS} />
+          </div>
 
+          <div className="min-w-0">
         <Section id="overview" title="Overview">
           <p>
             Every request to your subdomain runs through the same pipeline: match a route by path and
@@ -244,6 +243,8 @@ curl https://<host>/api/v1/routes \\
           <Link href="/dashboard" className="text-sm text-patch hover:underline">
             Open the console →
           </Link>
+        </div>
+          </div>
         </div>
       </div>
     </div>
