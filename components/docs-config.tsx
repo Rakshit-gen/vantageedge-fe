@@ -2,23 +2,28 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { Check, Copy } from 'lucide-react'
-import { copyText } from '@/lib/utils'
+import { cn, copyText } from '@/lib/utils'
 
 const HOST_KEY = 've-docs-host'
+const LANG_KEY = 've-docs-lang'
 const PLACEHOLDER = /<your-control-plane-host>|<host>/g
 
-type Ctx = { host: string; setHost: (v: string) => void }
-const DocsCtx = createContext<Ctx>({ host: '', setHost: () => {} })
+type Lang = 'curl' | 'js'
+type Ctx = { host: string; setHost: (v: string) => void; lang: Lang; setLang: (v: Lang) => void }
+const DocsCtx = createContext<Ctx>({ host: '', setHost: () => {}, lang: 'curl', setLang: () => {} })
 export const useDocsConfig = () => useContext(DocsCtx)
 
-/** Holds the reader's own control-plane host, remembered across visits. */
+/** Holds the reader's own host and preferred language, remembered across visits. */
 export function DocsConfig({ children }: { children: ReactNode }) {
   const [host, setHost] = useState('')
+  const [lang, setLang] = useState<Lang>('curl')
 
   useEffect(() => {
     try {
       const v = localStorage.getItem(HOST_KEY)
       if (v) setHost(v)
+      const l = localStorage.getItem(LANG_KEY)
+      if (l === 'curl' || l === 'js') setLang(l)
     } catch {}
   }, [])
 
@@ -29,7 +34,13 @@ export function DocsConfig({ children }: { children: ReactNode }) {
     } catch {}
   }, [host])
 
-  return <DocsCtx.Provider value={{ host, setHost }}>{children}</DocsCtx.Provider>
+  useEffect(() => {
+    try {
+      localStorage.setItem(LANG_KEY, lang)
+    } catch {}
+  }, [lang])
+
+  return <DocsCtx.Provider value={{ host, setHost, lang, setLang }}>{children}</DocsCtx.Provider>
 }
 
 export function HostBar() {
@@ -63,15 +74,31 @@ export function HostBar() {
   )
 }
 
-/** A CodeBlock that swaps the host placeholder for the reader's own host. */
-export function DocsCode({ code }: { code: string }) {
-  const { host } = useDocsConfig()
+function LangTab({ value, label }: { value: Lang; label: string }) {
+  const { lang, setLang } = useDocsConfig()
+  return (
+    <button
+      onClick={() => setLang(value)}
+      className={cn(
+        'ledger rounded-[2px] px-2 py-0.5 text-[11px] transition-colors',
+        lang === value ? 'bg-patch/15 text-patch' : 'text-muted-foreground hover:text-foreground',
+      )}
+    >
+      {label}
+    </button>
+  )
+}
+
+/** A code sample: swaps the host placeholder, and offers a fetch variant. */
+export function DocsCode({ code, js }: { code: string; js?: string }) {
+  const { host, lang } = useDocsConfig()
   const [copied, setCopied] = useState(false)
-  const resolved = host ? code.replace(PLACEHOLDER, host) : code
+  const source = js && lang === 'js' ? js : code
+  const resolved = host ? source.replace(PLACEHOLDER, host) : source
 
   const parts: ReactNode[] = []
   if (host) {
-    const segs = code.split(PLACEHOLDER)
+    const segs = source.split(PLACEHOLDER)
     segs.forEach((s, i) => {
       parts.push(s)
       if (i < segs.length - 1)
@@ -82,12 +109,23 @@ export function DocsCode({ code }: { code: string }) {
         )
     })
   } else {
-    parts.push(code)
+    parts.push(source)
   }
 
   return (
     <div className="group relative">
-      <pre className="ledger overflow-x-auto rounded border border-border bg-card p-4 text-xs leading-relaxed text-foreground">
+      {js && (
+        <div className="absolute left-3 top-2.5 z-10 flex gap-1">
+          <LangTab value="curl" label="curl" />
+          <LangTab value="js" label="fetch" />
+        </div>
+      )}
+      <pre
+        className={cn(
+          'ledger overflow-x-auto rounded border border-border bg-card p-4 text-xs leading-relaxed text-foreground',
+          js && 'pt-10',
+        )}
+      >
         <code>{parts}</code>
       </pre>
       <button

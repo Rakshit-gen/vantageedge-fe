@@ -99,6 +99,15 @@ curl https://<host>/api/v1/routes \\
 # machine caller
 curl https://<host>/api/v1/routes \\
   -H "X-API-Key: ve_live_..."`}
+            js={`// session — the console attaches this for you
+await fetch("https://<host>/api/v1/routes", {
+  headers: { Authorization: \`Bearer \${clerkJwt}\` },
+})
+
+// machine caller
+await fetch("https://<host>/api/v1/routes", {
+  headers: { "X-API-Key": "ve_live_..." },
+})`}
           />
         </Section>
 
@@ -126,6 +135,22 @@ curl https://<host>/api/v1/routes \\
     "max_retries": 3,
     "weight": 1
   }'`}
+            js={`await fetch("https://<host>/api/v1/origins", {
+  method: "POST",
+  headers: {
+    Authorization: \`Bearer \${clerkJwt}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    name: "orders-api",
+    url: "https://orders.internal.example.com",
+    health_check_path: "/health",
+    health_check_interval: 30,
+    timeout_seconds: 5,
+    max_retries: 3,
+    weight: 1,
+  }),
+})`}
           />
         </Section>
 
@@ -161,6 +186,27 @@ curl https://<host>/api/v1/routes \\
     "rate_limit_burst": 20,
     "cache_enabled": false
   }'`}
+            js={`await fetch("https://<host>/api/v1/routes", {
+  method: "POST",
+  headers: {
+    Authorization: \`Bearer \${clerkJwt}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    origin_id: "<origin uuid>",
+    name: "orders",
+    path_pattern: "/api/orders/*",
+    methods: ["GET", "POST"],
+    priority: 10,
+    auth_mode: "jwt_required",
+    load_balancing: "round_robin",
+    is_active: true,
+    rate_limit_enabled: true,
+    rate_limit_requests_per_second: 50,
+    rate_limit_burst: 20,
+    cache_enabled: false,
+  }),
+})`}
           />
         </Section>
 
@@ -199,6 +245,19 @@ curl https://<host>/api/v1/routes \\
   -H "Content-Type: application/json" \\
   -d '{ "name": "ci-deploy", "scopes": ["read","write"], "expires_at": "2026-12-31T23:59:59Z" }'
 # -> { ..., "key": "ve_live_xxx" }   (shown once)`}
+            js={`const res = await fetch("https://<host>/api/v1/api-keys", {
+  method: "POST",
+  headers: {
+    Authorization: \`Bearer \${clerkJwt}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    name: "ci-deploy",
+    scopes: ["read", "write"],
+    expires_at: "2026-12-31T23:59:59Z",
+  }),
+})
+const { key } = await res.json() // ve_live_xxx — shown once`}
           />
         </Section>
 
@@ -236,6 +295,10 @@ curl https://<host>/api/v1/routes \\
   "status_breakdown": { "200": 46110, "404": 900, "500": 210 },
   "top_routes": [ { "path": "/api/orders/*", "count": 12005, "avg_latency_ms": 41.2, "error_count": 30 } ]
 }`}
+            js={`const res = await fetch("https://<host>/api/v1/analytics?window=24h", {
+  headers: { Authorization: \`Bearer \${clerkJwt}\` },
+})
+const { totals, series, top_routes } = await res.json()`}
           />
         </Section>
 
