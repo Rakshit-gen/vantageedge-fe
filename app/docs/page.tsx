@@ -6,6 +6,7 @@ import { RequestSim } from '@/components/request-sim'
 import { Endpoints } from '@/components/docs-endpoints'
 import { AuthModes } from '@/components/docs-auth-modes'
 import { ReadingProgress } from '@/components/reading-progress'
+import { Reveal } from '@/components/reveal'
 
 export const metadata = {
   title: 'VantageEdge · docs',
@@ -326,12 +327,22 @@ const { totals, series, top_routes } = await res.json()`}
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-20 border-t border-border py-10 first-of-type:border-0">
-      <h2 className="font-display text-xl font-semibold tracking-tight">{title}</h2>
-      <div className="mt-4 space-y-4 text-sm leading-relaxed text-muted-foreground [&_p]:text-muted-foreground">
-        {children}
-      </div>
-    </section>
+    <Reveal>
+      <section id={id} className="scroll-mt-24 border-t border-border py-10">
+        <a href={`#${id}`} className="group flex items-center gap-2">
+          <h2 className="font-display text-xl font-semibold tracking-tight">{title}</h2>
+          <span
+            aria-hidden
+            className="font-mono text-patch opacity-0 transition-opacity group-hover:opacity-100"
+          >
+            #
+          </span>
+        </a>
+        <div className="mt-4 space-y-4 text-sm leading-relaxed text-muted-foreground [&_p]:text-muted-foreground">
+          {children}
+        </div>
+      </section>
+    </Reveal>
   )
 }
 
