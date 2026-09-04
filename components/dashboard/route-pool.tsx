@@ -1,6 +1,6 @@
 'use client'
 
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Minus, Plus } from 'lucide-react'
 import { routesApi } from '@/lib/api/resources'
 import { qk, useOptimisticMutation } from '@/lib/hooks/use-resource'
@@ -30,7 +30,6 @@ export function RoutePool({
   primaryOriginId: string
   allOrigins: Origin[]
 }) {
-  const qc = useQueryClient()
   const key = qk.routePool(routeId)
   const [toAdd, setToAdd] = useState('')
 
@@ -102,10 +101,7 @@ export function RoutePool({
             size="sm"
             variant="outline"
             disabled={!toAdd || add.isPending}
-            onClick={() => {
-              add.mutate(toAdd, { onSuccess: () => setToAdd('') })
-              qc.invalidateQueries({ queryKey: key })
-            }}
+            onClick={() => add.mutate(toAdd, { onSuccess: () => setToAdd('') })}
           >
             <Plus /> Add
           </Button>
