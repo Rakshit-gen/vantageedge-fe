@@ -32,6 +32,7 @@ export function InlineEdit({
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(String(value))
   const inputRef = useRef<HTMLInputElement>(null)
+  const committedRef = useRef(false)
 
   useEffect(() => {
     if (!editing) setDraft(String(value))
@@ -42,6 +43,8 @@ export function InlineEdit({
   }, [editing])
 
   const commit = () => {
+    if (committedRef.current) return
+    committedRef.current = true
     setEditing(false)
     if (draft !== String(value) && draft.trim() !== '') onCommit(draft.trim())
   }
@@ -73,7 +76,10 @@ export function InlineEdit({
   return (
     <button
       type="button"
-      onClick={() => setEditing(true)}
+      onClick={() => {
+        committedRef.current = false
+        setEditing(true)
+      }}
       className={cn(
         'group inline-flex items-center gap-1 rounded px-1 -mx-1 font-mono text-xs hover:bg-accent',
         className,
