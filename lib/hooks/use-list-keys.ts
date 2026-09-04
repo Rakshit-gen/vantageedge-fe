@@ -18,6 +18,10 @@ export function useListKeys({ count, onEnter, onToggle, searchRef }: ListKeysOpt
   const [cursor, setCursor] = useState(-1)
   const cursorRef = useRef(cursor)
   cursorRef.current = cursor
+  const onEnterRef = useRef(onEnter)
+  onEnterRef.current = onEnter
+  const onToggleRef = useRef(onToggle)
+  onToggleRef.current = onToggle
 
   useEffect(() => {
     if (cursor >= count) setCursor(count - 1)
@@ -47,15 +51,15 @@ export function useListKeys({ count, onEnter, onToggle, searchRef }: ListKeysOpt
         e.preventDefault()
         setCursor((c) => Math.max(0, c - 1))
       } else if (e.key === 'Enter' && i >= 0) {
-        onEnter?.(i)
+        onEnterRef.current?.(i)
       } else if (e.key === 'x' && i >= 0) {
         e.preventDefault()
-        onToggle?.(i)
+        onToggleRef.current?.(i)
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [count, onEnter, onToggle, searchRef])
+  }, [count, searchRef])
 
   const reset = useCallback(() => setCursor(-1), [])
   return { cursor, setCursor, reset }
