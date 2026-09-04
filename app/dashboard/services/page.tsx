@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { MoreHorizontal, Plus, RefreshCw } from 'lucide-react'
 import { originsApi } from '@/lib/api/resources'
@@ -43,13 +44,14 @@ export default function OriginsPage() {
   const [drawerId, setDrawerId] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<Origin | null>(null)
   const cmd = useCommandMenu()
+  const searchParams = useSearchParams()
 
   const { data: origins = [], isLoading } = useQuery({ queryKey: qk.origins, queryFn: originsApi.list })
 
   useEffect(() => {
-    const id = new URLSearchParams(window.location.search).get('id')
+    const id = searchParams.get('id')
     if (id) setDrawerId(id)
-  }, [])
+  }, [searchParams])
 
   useEffect(() => cmd.register('origins', { 'New origin': () => { setEditing(null); setDialogOpen(true) } }), [cmd])
 
