@@ -87,7 +87,7 @@ export function Patchboard({
               onMouseLeave={() => setHover(null)}
               className={cn(
                 'flex items-center gap-2 truncate py-0.5 transition-opacity',
-                hover && hover !== j.id && !cables.some((c) => c.from === hover && c.to === j.id) && 'opacity-40',
+                hover && hover !== j.id && !cables.some((c) => c.from === j.id && c.to === hover) && 'opacity-40',
               )}
             >
               <span className={cn('lamp', j.state === 'warn' ? 'lamp-warn' : j.state === 'off' ? 'lamp-off' : 'lamp-on')} />
@@ -190,7 +190,7 @@ export function Patchboard({
               onMouseLeave={() => setHover(null)}
               className={cn(
                 'flex items-center justify-end gap-2 truncate py-0.5 transition-opacity',
-                hover && hover !== j.id && !cables.some((c) => c.to === hover && c.from === j.id) && 'opacity-40',
+                hover && hover !== j.id && !cables.some((c) => c.to === j.id && c.from === hover) && 'opacity-40',
               )}
             >
               <span className="min-w-0 truncate text-foreground">{j.label}</span>
