@@ -272,6 +272,11 @@ function GenerateDialog({
 
 function RevealDialog({ issued, onClose }: { issued: APIKeyWithSecret | null; onClose: () => void }) {
   const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    setCopied(false)
+  }, [issued])
+
   return (
     <Dialog open={!!issued} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-[520px]">
