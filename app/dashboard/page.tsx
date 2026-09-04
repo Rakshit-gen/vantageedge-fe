@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowUpRight } from 'lucide-react'
@@ -157,9 +158,9 @@ export default function BoardPage() {
               <span className="font-medium text-destructive">{degraded.length}</span>{' '}
               {degraded.length === 1 ? 'origin is' : 'origins are'} failing health checks:{' '}
               {degraded.map((o) => o.name).join(', ')}.{' '}
-              <a href="/dashboard/services" className="inline-flex items-center gap-0.5 text-patch hover:underline">
+              <Link href="/dashboard/services" className="inline-flex items-center gap-0.5 text-patch hover:underline">
                 Open origins <ArrowUpRight className="h-3 w-3" />
-              </a>
+              </Link>
             </p>
           </div>
         </section>
@@ -178,13 +179,13 @@ function EmptyBoard({ hasRoutes }: { hasRoutes: boolean }) {
           : 'Add an origin, then patch a route to it. Traffic follows the cable.'}
       </p>
       <div className="mt-2 flex justify-center gap-2 font-mono text-xs">
-        <a href="/dashboard/services" className="text-patch hover:underline">
+        <Link href="/dashboard/services" className="text-patch hover:underline">
           + origin
-        </a>
+        </Link>
         <span className="text-border">·</span>
-        <a href="/dashboard/routes" className="text-patch hover:underline">
+        <Link href="/dashboard/routes" className="text-patch hover:underline">
           + route
-        </a>
+        </Link>
       </div>
     </div>
   )
