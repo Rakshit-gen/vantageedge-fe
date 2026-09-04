@@ -45,6 +45,8 @@ function ShellInner({ children }: { children: React.ReactNode }) {
   const { open } = useCommandMenu()
   const [railOpen, setRailOpen] = useState(false)
 
+  useEffect(() => setRailOpen(false), [pathname])
+
   const section = NAV.find((n) =>
     n.href === '/dashboard' ? pathname === n.href : pathname.startsWith(n.href),
   )
