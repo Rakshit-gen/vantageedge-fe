@@ -56,17 +56,37 @@ export default function TrafficPage() {
 
       <section className="grid gap-6 lg:grid-cols-2">
         <Panel title="throughput">
-          {isLoading ? <Skeleton className="h-[240px]" /> : <ThroughputArea data={data!.series} />}
+          {isLoading ? (
+            <Skeleton className="h-[240px]" />
+          ) : !data ? (
+            <NoData />
+          ) : (
+            <ThroughputArea data={data.series} />
+          )}
         </Panel>
         <Panel title="latency (avg)">
-          {isLoading ? <Skeleton className="h-[240px]" /> : <LatencyLine data={data!.series} />}
+          {isLoading ? (
+            <Skeleton className="h-[240px]" />
+          ) : !data ? (
+            <NoData />
+          ) : (
+            <LatencyLine data={data.series} />
+          )}
         </Panel>
         <Panel title="status codes">
-          {isLoading ? <Skeleton className="h-[240px]" /> : <StatusBars breakdown={data!.status_breakdown} />}
+          {isLoading ? (
+            <Skeleton className="h-[240px]" />
+          ) : !data ? (
+            <NoData />
+          ) : (
+            <StatusBars breakdown={data.status_breakdown} />
+          )}
         </Panel>
         <Panel title="cache hit rate">
           {isLoading ? (
             <Skeleton className="h-[200px]" />
+          ) : !data ? (
+            <NoData />
           ) : (
             <div className="relative">
               <CacheDonut hitRate={t?.cache_hit_rate ?? 0} />
@@ -124,6 +144,14 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
     <div className="space-y-3">
       <div className="eyebrow">{title}</div>
       <div className="panel p-4">{children}</div>
+    </div>
+  )
+}
+
+function NoData() {
+  return (
+    <div className="grid h-[240px] place-content-center text-sm text-muted-foreground">
+      Couldn't load this — retrying.
     </div>
   )
 }
