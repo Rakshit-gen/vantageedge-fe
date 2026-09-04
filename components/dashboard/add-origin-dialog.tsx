@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import {
   Dialog,
   DialogContent,
@@ -36,7 +35,6 @@ export function AddOriginDialog({
   onOpenChange: (open: boolean) => void
   origin?: Origin | null
 }) {
-  const qc = useQueryClient()
   const [form, setForm] = useState<OriginInput>(BLANK)
 
   useEffect(() => {
