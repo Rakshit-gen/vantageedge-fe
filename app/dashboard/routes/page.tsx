@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { MoreHorizontal, Plus } from 'lucide-react'
 import { originsApi, routesApi } from '@/lib/api/resources'
@@ -44,15 +45,16 @@ export default function RoutesPage() {
   const [drawerId, setDrawerId] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<Route | null>(null)
   const cmd = useCommandMenu()
+  const searchParams = useSearchParams()
 
   const { data: routes = [], isLoading } = useQuery({ queryKey: qk.routes, queryFn: routesApi.list })
   const { data: origins = [] } = useQuery({ queryKey: qk.origins, queryFn: originsApi.list })
   const originName = useMemo(() => new Map(origins.map((o) => [o.id, o.name])), [origins])
 
   useEffect(() => {
-    const id = new URLSearchParams(window.location.search).get('id')
+    const id = searchParams.get('id')
     if (id) setDrawerId(id)
-  }, [])
+  }, [searchParams])
 
   useEffect(
     () => cmd.register('routes', { 'Patch a route': () => { setEditing(null); setDialogOpen(true) } }),
