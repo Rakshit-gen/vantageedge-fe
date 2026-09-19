@@ -43,6 +43,7 @@ export function useListKeys({ count, onEnter, onToggle, searchRef }: ListKeysOpt
       }
       if (typing || e.metaKey || e.ctrlKey || e.altKey) return
 
+      if (count === 0) return
       const i = cursorRef.current
       if (e.key === 'j') {
         e.preventDefault()
