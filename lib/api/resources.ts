@@ -47,8 +47,9 @@ export interface RouteInput {
 
 export const tenantApi = {
   get: () => api.get<Tenant>('/tenants/me').then((r) => r.data),
-  // The control-plane only persists name/status/settings on a tenant.
-  update: (body: { name?: string; status?: string; settings?: Record<string, unknown> }) =>
+  // A tenant can change its own name and settings. Status is set by an
+  // operator only; the control plane ignores it here.
+  update: (body: { name?: string; settings?: Record<string, unknown> }) =>
     api.put<Tenant>('/tenants/me', body).then((r) => r.data),
   remove: () => api.delete('/tenants/me').then(() => undefined),
 }
