@@ -36,8 +36,8 @@ If your Clerk instance needs a JWT template for the backend audience, set
 
 | Route | What it is |
 |---|---|
-| `/` | Landing page, with an interactive request simulator |
-| `/docs` | API reference |
+| `/` | Landing page, with a clickable example board (send requests, take origins down) |
+| `/docs` | API reference, with a route-match tester and a route request builder |
 | `/dashboard` | The board: patchboard + traffic rollup |
 | `/dashboard/services` | Origins (dense table, inline edit, health) |
 | `/dashboard/routes` | Routes as signal paths, per-route load balancing, origin-pool editor in the drawer |
