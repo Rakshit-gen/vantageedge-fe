@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /*
- * "The Exchange" — an API gateway is a switchboard: calls arrive, an operator
+ * "The Exchange": an API gateway is a switchboard: calls arrive, an operator
  * patches each to a destination. Warm ink and paper, not cold graphite. One
  * patch-cord accent, spent sparingly on the live connection and the primary
  * action. Olive is the signal lamp: healthy, steady. No glow, no scanlines.
@@ -19,8 +19,8 @@
     --popover: 38 9% 9%;
     --popover-foreground: 42 24% 87%;
 
-    --primary: 12 68% 54%; /* patch-cord — the live connection, the one action */
-    --primary-foreground: 40 30% 96%;
+    --primary: 12 68% 54%; /* patch-cord: the live connection, the one action */
+    --primary-foreground: 40 9% 7%;
 
     --secondary: 38 7% 15%;
     --secondary-foreground: 42 20% 84%;
@@ -34,7 +34,7 @@
     --destructive: 4 62% 52%;
     --destructive-foreground: 40 30% 96%;
 
-    --success: 82 22% 44%; /* signal lamp — healthy origin, active route */
+    --success: 82 22% 44%; /* signal lamp: healthy origin, active route */
     --success-foreground: 40 30% 96%;
 
     --warning: 34 64% 50%;
@@ -111,7 +111,7 @@
     letter-spacing: -0.01em;
   }
 
-  /* Signal lamp. Solid, no bloom — a lamp on a panel, not a neon sign.
+  /* Signal lamp. Solid, no bloom, a lamp on a panel, not a neon sign.
      .lamp-on healthy, .lamp-warn degraded, .lamp-off down/inactive. */
   .lamp {
     @apply inline-block h-[7px] w-[7px] shrink-0 rounded-full;
@@ -127,17 +127,17 @@
     background: hsl(var(--destructive));
   }
 
-  /* Section eyebrow: the label stamped above a block. Small caps, tracked,
-     with a short rule after it. */
+  /* Section label: a short heading above a block with a hairline rule after
+     it, like a ruled ledger column. */
   .eyebrow {
-    @apply flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground;
+    @apply flex items-center gap-3 text-sm font-medium text-foreground;
   }
   .eyebrow::after {
     content: '';
     @apply h-px flex-1 bg-border;
   }
 
-  /* The patch: ingress → policy → origin, read left to right. */
+  /* The patch: ingress, policy, origin, read left to right. */
   .patch-line {
     @apply flex flex-wrap items-center gap-x-2.5 gap-y-1.5 font-mono text-sm;
   }
@@ -149,140 +149,6 @@
 @layer utilities {
   .animate-in {
     animation: fade-in 0.18s ease-out;
-  }
-
-  /* Load-in: hero elements rise into place, staggered by .rise-1..4. */
-  @keyframes rise {
-    from {
-      opacity: 0;
-      transform: translateY(14px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-  .rise-1 {
-    animation: rise 0.7s cubic-bezier(0.2, 0.6, 0.2, 1) 0.05s both;
-  }
-  .rise-2 {
-    animation: rise 0.7s cubic-bezier(0.2, 0.6, 0.2, 1) 0.16s both;
-  }
-  .rise-3 {
-    animation: rise 0.7s cubic-bezier(0.2, 0.6, 0.2, 1) 0.28s both;
-  }
-  .rise-4 {
-    animation: rise 0.7s cubic-bezier(0.2, 0.6, 0.2, 1) 0.4s both;
-  }
-
-  /* Scroll-reveal: <Reveal> starts hidden, .is-in settles it. */
-  .reveal {
-    opacity: 0;
-    transform: translateY(16px);
-    transition:
-      opacity 0.6s ease-out,
-      transform 0.6s ease-out;
-    transition-delay: var(--reveal-delay, 0s);
-  }
-  .reveal.is-in {
-    opacity: 1;
-    transform: none;
-  }
-
-  /* Capability-glyph motion — looping, quiet, all transform/opacity/dash so
-     the global reduced-motion reset collapses every one of them. */
-  .glyph [class^='g-'] {
-    transform-box: fill-box;
-  }
-  @keyframes g-drip {
-    0%,
-    55% {
-      transform: translateY(0);
-      opacity: 0;
-    }
-    68% {
-      opacity: 0.6;
-    }
-    100% {
-      transform: translateY(11px);
-      opacity: 0;
-    }
-  }
-  @keyframes g-slide-x {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(46px);
-    }
-  }
-  @keyframes g-draw {
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
-  @keyframes g-bob {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-2px);
-    }
-  }
-  @keyframes g-stretch {
-    0%,
-    100% {
-      transform: scaleX(1);
-    }
-    50% {
-      transform: scaleX(1.12);
-    }
-  }
-  @keyframes g-slot {
-    0%,
-    18% {
-      transform: translateY(0);
-    }
-    25%,
-    43% {
-      transform: translateY(14px);
-    }
-    50%,
-    68% {
-      transform: translateY(28px);
-    }
-    75%,
-    93% {
-      transform: translateY(42px);
-    }
-  }
-  .g-drip {
-    animation: g-drip 2.8s ease-in infinite;
-  }
-  .g-travel {
-    animation: g-slide-x 2.6s ease-in-out infinite alternate;
-  }
-  .g-draw {
-    stroke-dasharray: 240;
-    stroke-dashoffset: 240;
-    animation: g-draw 2.2s ease-out infinite alternate;
-  }
-  .g-bob > * {
-    animation: g-bob 2.4s ease-in-out infinite;
-  }
-  .g-bob > *:nth-child(2) {
-    animation-delay: 0.18s;
-  }
-  .g-bob > *:nth-child(3) {
-    animation-delay: 0.36s;
-  }
-  .g-stretch {
-    transform-origin: left center;
-    animation: g-stretch 3s ease-in-out infinite;
-  }
-  .g-slot {
-    animation: g-slot 6.4s steps(1, end) infinite;
   }
 }
 
