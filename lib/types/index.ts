@@ -1,4 +1,4 @@
-// Wire types — these mirror the Go models the control-plane returns
+// Wire types. These mirror the Go models the control-plane returns
 // (internal/models/models.go) and the analytics payload
 // (internal/controlplane/service/analytics.go). snake_case on purpose.
 

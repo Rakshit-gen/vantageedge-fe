@@ -21,7 +21,7 @@ function ApiAuthBridge() {
         return template ? await getToken({ template }) : await getToken()
       } catch {
         // A missing or misconfigured JWT template must not wedge every
-        // request — fall back to Clerk's default session token.
+        // request; fall back to Clerk's default session token.
         return getToken()
       }
     }

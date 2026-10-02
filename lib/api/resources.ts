@@ -12,7 +12,7 @@ import type {
 } from '@/lib/types'
 
 // Thin per-resource wrappers over the one authenticated client. No logic
-// beyond URL + verb + "return the body" — the control-plane returns bare
+// beyond URL + verb + "return the body"; the control-plane returns bare
 // arrays and objects. These are the fns pages hand to react-query.
 
 export interface OriginInput {

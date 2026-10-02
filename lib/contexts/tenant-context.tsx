@@ -17,8 +17,8 @@ const TenantContext = createContext<TenantContextValue | null>(null)
 
 /**
  * The tenant is resolved by the backend from the Clerk JWT (auto-provisioned
- * on first authenticated request). This just surfaces `GET /tenants/me` —
- * the real tenant UUID, name, subdomain — to the whole dashboard.
+ * on first authenticated request). This just surfaces `GET /tenants/me`
+ * (the real tenant UUID, name, subdomain) to the whole dashboard.
  */
 export function TenantProvider({ children }: { children: React.ReactNode }) {
   const { isSignedIn } = useAuth()

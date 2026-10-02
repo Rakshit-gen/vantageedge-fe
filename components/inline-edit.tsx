@@ -17,7 +17,7 @@ interface InlineEditProps {
 
 /**
  * Click the value to edit it in place. Enter or blur commits, Escape
- * cancels. The commit is optimistic upstream, so there's no spinner —
+ * cancels. The commit is optimistic upstream, so there's no spinner;
  * a failed write rolls back and toasts.
  */
 export function InlineEdit({

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 /**
  * The panel: the gateway as a control surface lit from above. A slow amber
  * bloom, a dot-grid that fades out from the light, film grain, and two patch
- * cords strung the length of the board — one idle, one carrying traffic.
+ * cords strung the length of the board: one idle, one carrying traffic.
  *
  * It answers the pointer: the lamp follows the cursor (so the grid lights up
  * under it), the live cord bends toward the cursor like a plucked string,
@@ -209,7 +209,7 @@ export function PanelField({ className }: { className?: string }) {
       ctx.lineWidth = 3.4
       ctx.stroke()
 
-      // travelling beads — faster while the pointer is moving over the board
+      // travelling beads, faster while the pointer is moving over the board
       if (!reduce) {
         const boost = 1 + 1.6 * k
         for (let bi = 0; bi < beads.length; bi++) {
