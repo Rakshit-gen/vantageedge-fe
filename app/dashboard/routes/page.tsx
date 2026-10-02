@@ -57,7 +57,7 @@ export default function RoutesPage() {
   }, [searchParams])
 
   useEffect(
-    () => cmd.register('routes', { 'Patch a route': () => { setEditing(null); setDialogOpen(true) } }),
+    () => cmd.register('routes', { 'Add a route': () => { setEditing(null); setDialogOpen(true) } }),
     [cmd],
   )
 
@@ -71,7 +71,7 @@ export default function RoutesPage() {
     mutationFn: (id) => routesApi.remove(id),
     listKey: qk.routes,
     optimistic: (cur, id) => cur?.filter((r) => r.id !== id),
-    success: 'Route unpatched',
+    success: 'Route deleted',
   })
 
   const filtered = routes
@@ -96,12 +96,12 @@ export default function RoutesPage() {
         <div>
           <h1 className="font-display text-2xl font-semibold tracking-tight">Routes</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            The patch list, highest priority first. Each line reads left to right: what comes in, how it's
+            Routes in match order, highest priority first. Each line reads left to right: what comes in, how it's
             checked, where it goes.
           </p>
         </div>
         <Button onClick={() => { setEditing(null); setDialogOpen(true) }} disabled={origins.length === 0}>
-          <Plus /> Patch a route
+          <Plus /> Add a route
         </Button>
       </header>
 
@@ -143,7 +143,7 @@ export default function RoutesPage() {
                     <PolicyChips route={r} className="flex flex-wrap items-center gap-1" />
                     <span className="patch-arrow">═▶</span>
                     <span className="font-mono text-sm text-lamp">
-                      {originName.get(r.origin_id) ?? 'unpatched'}
+                      {originName.get(r.origin_id) ?? 'no origin'}
                     </span>
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground">
@@ -173,7 +173,7 @@ export default function RoutesPage() {
                         className="text-destructive focus:text-destructive"
                         onClick={() => setConfirmDelete(r)}
                       >
-                        Unpatch
+                        Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -224,7 +224,7 @@ export default function RoutesPage() {
       <Drawer
         open={!!drawerRoute}
         onOpenChange={(o) => !o && setDrawerId(null)}
-        eyebrow="route"
+        eyebrow="Route"
         title={drawerRoute?.name ?? ''}
         footer={
           drawerRoute && (
@@ -233,7 +233,7 @@ export default function RoutesPage() {
                 Edit
               </Button>
               <Button variant="destructive" size="sm" onClick={() => { setConfirmDelete(drawerRoute); setDrawerId(null) }}>
-                Unpatch
+                Delete
               </Button>
             </div>
           )
@@ -268,7 +268,7 @@ export default function RoutesPage() {
             </dl>
 
             <div>
-              <div className="eyebrow mb-3">origin pool</div>
+              <div className="eyebrow mb-3">Origin pool</div>
               <RoutePool routeId={drawerRoute.id} primaryOriginId={drawerRoute.origin_id} allOrigins={origins} />
             </div>
           </div>
@@ -278,7 +278,7 @@ export default function RoutesPage() {
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Unpatch {confirmDelete?.name}?</AlertDialogTitle>
+            <AlertDialogTitle>Delete {confirmDelete?.name}?</AlertDialogTitle>
             <AlertDialogDescription>
               Requests matching {confirmDelete?.path_pattern} will no longer be forwarded.
             </AlertDialogDescription>
@@ -291,7 +291,7 @@ export default function RoutesPage() {
                 setConfirmDelete(null)
               }}
             >
-              Unpatch
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -303,7 +303,7 @@ export default function RoutesPage() {
 function Row({ k, children }: { k: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-4 border-b border-border/60 pb-2">
-      <dt className="w-24 shrink-0 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">{k}</dt>
+      <dt className="w-24 shrink-0 text-xs text-muted-foreground">{k}</dt>
       <dd className="min-w-0 flex-1 break-all text-foreground">{children}</dd>
     </div>
   )
@@ -313,18 +313,18 @@ function Empty({ q, noOrigins, onAdd }: { q: string; noOrigins: boolean; onAdd: 
   return (
     <div className="panel grid place-content-center gap-2 py-16 text-center">
       <p className="text-sm text-foreground">
-        {q ? 'No route matches that.' : noOrigins ? 'No origins to patch to yet.' : 'Nothing patched.'}
+        {q ? 'No route matches that.' : noOrigins ? 'No origins yet.' : 'No routes yet.'}
       </p>
       {!q && (
         <p className="max-w-sm text-sm text-muted-foreground">
           {noOrigins
-            ? 'Add an origin on the Origins panel first, then come back and patch a route to it.'
-            : 'Patch your first route: a path pattern, the methods it covers, and an origin.'}
+            ? 'Add an origin on the Origins panel first, then come back and add a route that points at it.'
+            : 'Add your first route: a path pattern, the methods it covers, and an origin.'}
         </p>
       )}
       {!q && !noOrigins && (
         <Button variant="outline" size="sm" className="mx-auto mt-2" onClick={onAdd}>
-          <Plus /> Patch a route
+          <Plus /> Add a route
         </Button>
       )}
     </div>

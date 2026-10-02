@@ -21,12 +21,12 @@ import { CommandMenuProvider, useCommandMenu } from '@/components/command-menu'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 const NAV = [
-  { name: 'Board', href: '/dashboard', icon: LayoutGrid },
+  { name: 'Overview', href: '/dashboard', icon: LayoutGrid },
   { name: 'Origins', href: '/dashboard/services', icon: Server },
   { name: 'Routes', href: '/dashboard/routes', icon: RouteIcon },
   { name: 'Keys', href: '/dashboard/api-keys', icon: KeyRound },
   { name: 'Traffic', href: '/dashboard/analytics', icon: BarChart3 },
-  { name: 'Exchange', href: '/dashboard/settings', icon: Settings },
+  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -69,7 +69,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
         </Link>
 
         <nav className="flex-1 py-3">
-          {NAV.map((item, i) => {
+          {NAV.map((item) => {
             const active =
               item.href === '/dashboard'
                 ? pathname === item.href
@@ -91,9 +91,6 @@ function ShellInner({ children }: { children: React.ReactNode }) {
                     active ? 'opacity-100' : 'opacity-0',
                   )}
                 />
-                <span className="font-mono text-[11px] tabular-nums text-muted-foreground/60">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
                 <Icon className="h-4 w-4" />
                 <span>{item.name}</span>
               </Link>
@@ -105,7 +102,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2.5">
             <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: 'h-7 w-7 rounded-[3px]' } }} />
             <div className="min-w-0 leading-tight">
-              <div className="truncate text-xs text-foreground">{tenant?.name ?? '—'}</div>
+              <div className="truncate text-xs text-foreground">{tenant?.name ?? 'Loading tenant'}</div>
               <div className="ledger truncate text-[11px] text-muted-foreground">
                 {tenant ? `${tenant.subdomain}.vantageedge.dev` : 'resolving…'}
               </div>
@@ -129,7 +126,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
 
       {/* main column */}
       <div className="flex min-w-0 flex-1 flex-col lg:pl-52">
-        <header className="sticky top-0 z-20 flex h-12 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur">
+        <header className="sticky top-0 z-20 flex h-12 items-center gap-3 border-b border-border bg-background px-4">
           <button
             className="rounded p-1 text-muted-foreground hover:text-foreground lg:hidden"
             onClick={() => setRailOpen(true)}
@@ -139,9 +136,9 @@ function ShellInner({ children }: { children: React.ReactNode }) {
           </button>
 
           <div className="ledger flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="hidden sm:inline">the&nbsp;exchange</span>
+            <span className="hidden sm:inline">VantageEdge</span>
             <span className="hidden text-border sm:inline">/</span>
-            <span className="text-foreground">{section?.name.toLowerCase() ?? 'board'}</span>
+            <span className="text-foreground">{section?.name ?? 'Overview'}</span>
           </div>
 
           <div className="flex-1" />
@@ -151,7 +148,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
             className="flex items-center gap-2 rounded border border-border px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
             <CommandIcon className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">patch bay</span>
+            <span className="hidden sm:inline">Search</span>
             <kbd className="ledger rounded-[2px] border border-border px-1 text-[10px]">⌘K</kbd>
           </button>
         </header>

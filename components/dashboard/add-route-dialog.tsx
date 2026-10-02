@@ -96,7 +96,7 @@ export function AddRouteDialog({
   const mutation = useOptimisticMutation<RouteInput>({
     mutationFn: (body) => (route ? routesApi.update(route.id, body) : routesApi.create(body)),
     listKey: qk.routes,
-    success: route ? 'Route updated' : 'Route patched in',
+    success: route ? 'Route updated' : 'Route added',
   })
 
   const set = <K extends keyof RouteInput>(k: K, v: RouteInput[K]) => setForm((f) => ({ ...f, [k]: v }))
@@ -107,7 +107,7 @@ export function AddRouteDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-[560px]">
         <DialogHeader>
-          <DialogTitle>{route ? 'Edit route' : 'Patch a route'}</DialogTitle>
+          <DialogTitle>{route ? 'Edit route' : 'Add a route'}</DialogTitle>
           <DialogDescription>
             A path pattern the exchange watches for, and the origin it hands matching requests to.
           </DialogDescription>
@@ -267,7 +267,7 @@ export function AddRouteDialog({
               type="submit"
               disabled={mutation.isPending || !form.name || !form.path_pattern || !form.origin_id || form.methods.length === 0}
             >
-              {mutation.isPending ? 'Saving…' : route ? 'Save' : 'Patch route'}
+              {mutation.isPending ? 'Saving…' : route ? 'Save' : 'Add route'}
             </Button>
           </DialogFooter>
         </form>
@@ -279,7 +279,7 @@ export function AddRouteDialog({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">{label}</Label>
+      <Label className="text-xs text-muted-foreground">{label}</Label>
       {children}
     </div>
   )

@@ -63,7 +63,7 @@ export function RoutePool({
             <span className={cn('lamp', 'lamp-on')} />
             {allOrigins.find((o) => o.id === primaryOriginId)?.name ?? primaryOriginId}
           </span>
-          <span className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">primary</span>
+          <span className="text-xs text-muted-foreground">Primary</span>
         </li>
         {pool
           .filter((o) => o.id !== primaryOriginId)

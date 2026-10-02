@@ -42,7 +42,7 @@ export default function ExchangePage() {
   return (
     <div className="max-w-2xl space-y-10">
       <header>
-        <h1 className="font-display text-2xl font-semibold tracking-tight">The exchange</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Your tenant. It was provisioned automatically the first time you signed in.
         </p>
@@ -53,7 +53,7 @@ export default function ExchangePage() {
       ) : (
         <>
           <section className="space-y-4">
-            <div className="eyebrow">identity</div>
+            <div className="eyebrow">Tenant</div>
             <dl className="ledger divide-y divide-border/70 rounded border border-border">
               <Field label="Name">
                 <InlineEdit
@@ -80,7 +80,7 @@ export default function ExchangePage() {
                     onClick={async () => {
                       if (await copyText(tenant.id)) {
                         setCopied(true)
-                        toast.success('Copied')
+                        toast.success('Tenant ID copied')
                         setTimeout(() => setCopied(false), 1500)
                       }
                     }}
@@ -96,10 +96,10 @@ export default function ExchangePage() {
           </section>
 
           <section className="space-y-4">
-            <div className="eyebrow">operator</div>
+            <div className="eyebrow">Your account</div>
             <dl className="ledger divide-y divide-border/70 rounded border border-border">
               <Field label="Signed in as">
-                <span className="text-foreground">{user?.primaryEmailAddress?.emailAddress ?? '—'}</span>
+                <span className="text-foreground">{user?.primaryEmailAddress?.emailAddress ?? 'No email on file'}</span>
               </Field>
               <Field label="Profile">
                 <span className="text-muted-foreground">
@@ -110,14 +110,14 @@ export default function ExchangePage() {
           </section>
 
           <section className="space-y-4">
-            <div className="eyebrow">danger</div>
+            <div className="eyebrow">Delete</div>
             <div className="space-y-3 rounded border border-destructive/40 p-4">
               <p className="text-sm text-foreground">Delete this tenant</p>
               <p className="text-sm text-muted-foreground">
                 Removes every origin, route and key, and stops the gateway for{' '}
                 <span className="font-mono">{tenant.subdomain}.vantageedge.dev</span>. There is no undo.
               </p>
-              <Label className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+              <Label className="text-xs text-muted-foreground">
                 Type <span className="text-foreground">{tenant.subdomain}</span> to confirm
               </Label>
               <div className="flex flex-col gap-2 sm:flex-row">
@@ -154,7 +154,7 @@ export default function ExchangePage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-4 px-4 py-2.5 text-sm">
-      <dt className="w-28 shrink-0 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">{label}</dt>
+      <dt className="w-28 shrink-0 text-xs text-muted-foreground">{label}</dt>
       <dd className="min-w-0 flex-1">{children}</dd>
     </div>
   )

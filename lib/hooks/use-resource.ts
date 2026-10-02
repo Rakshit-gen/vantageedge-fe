@@ -4,7 +4,7 @@ import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-quer
 import { toast } from 'sonner'
 import { ApiError } from '@/lib/api/client'
 
-/** Canonical query keys — one place so invalidation never drifts. */
+/** Canonical query keys, in one place so invalidation never drifts. */
 export const qk = {
   tenant: ['tenant'] as QueryKey,
   origins: ['origins'] as QueryKey,
@@ -48,7 +48,7 @@ export function useOptimisticMutation<TVars, TData = unknown, TList = unknown>(
     onError: (err, _vars, ctx) => {
       if (ctx?.prev !== undefined) qc.setQueryData(opts.listKey, ctx.prev)
       toast.error(
-        opts.errorMessage ?? (err instanceof ApiError ? err.message : 'Something went wrong'),
+        opts.errorMessage ?? (err instanceof ApiError ? err.message : 'The request failed. Check your connection and try again.'),
       )
     },
     onSuccess: (data, vars) => {

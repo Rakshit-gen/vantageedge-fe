@@ -80,13 +80,12 @@ export function CommandMenuProvider({ children }: { children: React.ReactNode })
       <Command.Dialog
         open={isOpen}
         onOpenChange={setIsOpen}
-        label="Patch bay"
+        label="Search the console"
         overlayClassName="fixed inset-0 z-[99] bg-background/70 data-[state=open]:animate-fade-in"
         contentClassName="fixed left-1/2 top-[20vh] z-[100] w-[92vw] max-w-xl -translate-x-1/2 overflow-hidden rounded border border-border bg-popover shadow-2xl data-[state=open]:animate-fade-in"
       >
-        <div className="eyebrow after:hidden border-b border-border px-4 py-2">patch bay</div>
         <Command.Input
-          placeholder="Patch to a route, origin, or panel…"
+          placeholder="Search routes, origins and pages"
           className="ledger w-full border-b border-border bg-transparent px-4 py-3 text-sm outline-none placeholder:text-muted-foreground"
         />
         <Command.List className="max-h-80 overflow-y-auto p-1.5">
@@ -94,7 +93,7 @@ export function CommandMenuProvider({ children }: { children: React.ReactNode })
             Nothing matches.
           </Command.Empty>
 
-          <Command.Group heading="Go to" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:text-muted-foreground">
+          <Command.Group heading="Go to" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:text-muted-foreground">
             <Item icon={LayoutGrid} onSelect={() => go('/dashboard')}>Overview</Item>
             <Item icon={Server} onSelect={() => go('/dashboard/services')}>Origins</Item>
             <Item icon={RouteIcon} onSelect={() => go('/dashboard/routes')}>Routes</Item>
@@ -104,7 +103,7 @@ export function CommandMenuProvider({ children }: { children: React.ReactNode })
           </Command.Group>
 
           {pageActions.length > 0 && (
-            <Command.Group heading="Actions" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:text-muted-foreground">
+            <Command.Group heading="Actions" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:text-muted-foreground">
               {pageActions.map(([label, run]) => (
                 <Item key={label} icon={Plus} onSelect={() => { run(); setIsOpen(false) }}>
                   {label}
@@ -125,7 +124,7 @@ export function CommandMenuProvider({ children }: { children: React.ReactNode })
           )}
 
           {routes.length > 0 && (
-            <Command.Group heading="Routes" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:text-muted-foreground">
+            <Command.Group heading="Routes" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:text-muted-foreground">
               {routes.map((r) => (
                 <Item key={r.id} icon={RouteIcon} onSelect={() => go(`/dashboard/routes?id=${r.id}`)}>
                   <span className="shrink-0">{r.name}</span>
@@ -136,7 +135,7 @@ export function CommandMenuProvider({ children }: { children: React.ReactNode })
           )}
 
           {origins.length > 0 && (
-            <Command.Group heading="Origins" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:text-muted-foreground">
+            <Command.Group heading="Origins" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:text-muted-foreground">
               {origins.map((o) => (
                 <Item key={o.id} icon={Server} onSelect={() => go(`/dashboard/services?id=${o.id}`)}>
                   <span className="shrink-0">{o.name}</span>

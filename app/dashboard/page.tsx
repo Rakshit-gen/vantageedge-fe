@@ -58,9 +58,9 @@ export default function BoardPage() {
     <div className="space-y-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">The board</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Overview</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Every route patched through the exchange, and what crossed it{' '}
+            Each route, the origin it forwards to, and the traffic it handled{' '}
             {win === '1h' ? 'this hour' : win === '24h' ? 'today' : `over ${win}`}.
           </p>
         </div>
@@ -97,7 +97,7 @@ export default function BoardPage() {
       </section>
 
       <section className="space-y-3">
-        <div className="eyebrow">switchboard</div>
+        <div className="eyebrow">Routes and origins</div>
         {routes.isLoading || origins.isLoading ? (
           <Skeleton className="h-[340px]" />
         ) : cables.length === 0 ? (
@@ -117,7 +117,7 @@ export default function BoardPage() {
 
       <section className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="space-y-3">
-          <div className="eyebrow">throughput</div>
+          <div className="eyebrow">Throughput</div>
           <div className="panel p-4">
             {analytics.isLoading ? (
               <Skeleton className="h-[240px]" />
@@ -132,7 +132,7 @@ export default function BoardPage() {
         </div>
 
         <div className="space-y-3">
-          <div className="eyebrow">busiest paths</div>
+          <div className="eyebrow">Busiest paths</div>
           <div className="panel divide-y divide-border/70">
             {(analytics.data?.top_routes ?? []).slice(0, 6).map((r) => (
               <div key={r.path} className="ledger flex items-center justify-between gap-3 px-4 py-2.5 text-xs">
@@ -152,7 +152,7 @@ export default function BoardPage() {
 
       {degraded.length > 0 && (
         <section className="space-y-3">
-          <div className="eyebrow">attention</div>
+          <div className="eyebrow">Needs attention</div>
           <div className="panel border-destructive/40 p-4">
             <p className="text-sm">
               <span className="font-medium text-destructive">{degraded.length}</span>{' '}
@@ -172,19 +172,19 @@ export default function BoardPage() {
 function EmptyBoard({ hasRoutes }: { hasRoutes: boolean }) {
   return (
     <div className="panel grid place-content-center gap-2 py-16 text-center">
-      <p className="text-sm text-foreground">The switchboard is unpatched.</p>
+      <p className="text-sm text-foreground">No routes are connected to an origin yet.</p>
       <p className="max-w-sm text-sm text-muted-foreground">
         {hasRoutes
-          ? 'Your routes point at origins that are not in the pool yet.'
-          : 'Add an origin, then patch a route to it. Traffic follows the cable.'}
+          ? 'Your routes exist, but none of them has an origin in its pool.'
+          : 'Add an origin, then add a route that points at it.'}
       </p>
       <div className="mt-2 flex justify-center gap-2 font-mono text-xs">
         <Link href="/dashboard/services" className="text-patch hover:underline">
-          + origin
+          Add an origin
         </Link>
         <span className="text-border">·</span>
         <Link href="/dashboard/routes" className="text-patch hover:underline">
-          + route
+          Add a route
         </Link>
       </div>
     </div>

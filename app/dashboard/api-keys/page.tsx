@@ -225,11 +225,11 @@ function GenerateDialog({
           }}
         >
           <div className="space-y-1.5">
-            <Label className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">Name</Label>
+            <Label className="text-xs text-muted-foreground">Name</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="ci-deploy" required />
           </div>
           <div className="space-y-1.5">
-            <Label className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">Scopes</Label>
+            <Label className="text-xs text-muted-foreground">Scopes</Label>
             <div className="flex gap-1.5">
               {SCOPES.map((s) => (
                 <button
@@ -251,7 +251,7 @@ function GenerateDialog({
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+            <Label className="text-xs text-muted-foreground">
               Expires (optional)
             </Label>
             <Input type="date" value={expires} onChange={(e) => setExpires(e.target.value)} />

@@ -197,7 +197,7 @@ export default function OriginsPage() {
       <Drawer
         open={!!drawerOrigin}
         onOpenChange={(o) => !o && setDrawerId(null)}
-        eyebrow="origin"
+        eyebrow="Origin"
         title={drawerOrigin?.name ?? ''}
         footer={
           drawerOrigin && (
@@ -237,7 +237,7 @@ export default function OriginsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Remove {confirmDelete?.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Routes patched to this origin will stop resolving until you point them elsewhere.
+              Routes that point at this origin will stop resolving until you point them elsewhere.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -260,7 +260,7 @@ export default function OriginsPage() {
 function Row({ k, children }: { k: string; children: React.ReactNode }) {
   return (
     <div className="flex gap-4 border-b border-border/60 pb-2">
-      <dt className="w-28 shrink-0 text-[11px] uppercase tracking-[0.1em] text-muted-foreground">{k}</dt>
+      <dt className="w-28 shrink-0 text-xs text-muted-foreground">{k}</dt>
       <dd className="min-w-0 flex-1 break-all text-foreground">{children}</dd>
     </div>
   )

@@ -144,7 +144,7 @@ export function AddOriginDialog({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">{label}</Label>
+      <Label className="text-xs text-muted-foreground">{label}</Label>
       {children}
     </div>
   )
