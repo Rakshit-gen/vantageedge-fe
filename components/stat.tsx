@@ -21,7 +21,7 @@ export function Stat({
 }) {
   return (
     <div className={cn('panel p-4', className)}>
-      <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+      <div className="text-xs text-muted-foreground">
         {label}
       </div>
       <div

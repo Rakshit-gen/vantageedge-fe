@@ -28,7 +28,7 @@ export function Drawer({
   return (
     <Vaul.Root open={open} onOpenChange={onOpenChange} direction="right">
       <Vaul.Portal>
-        <Vaul.Overlay className="fixed inset-0 z-50 bg-background/70 backdrop-blur-sm" />
+        <Vaul.Overlay className="fixed inset-0 z-50 bg-background/70 -sm" />
         <Vaul.Content
           className={cn(
             'fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-border bg-card shadow-2xl outline-none',
@@ -38,11 +38,11 @@ export function Drawer({
           <div className="flex items-start justify-between gap-4 border-b border-border p-4">
             <div className="min-w-0">
               {eyebrow && (
-                <div className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+                <div className="text-xs text-muted-foreground">
                   {eyebrow}
                 </div>
               )}
-              <Vaul.Title className="mt-0.5 truncate font-display text-base font-semibold uppercase tracking-wide">
+              <Vaul.Title className="mt-0.5 truncate font-display text-base font-semibold">
                 {title}
               </Vaul.Title>
             </div>
