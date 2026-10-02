@@ -71,13 +71,40 @@ export function Patchboard({
   return (
     <div className={cn('panel relative overflow-hidden', className)}>
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
-        <span className="eyebrow after:hidden">switchboard</span>
-        <span className="font-mono text-[11px] text-muted-foreground">
-          {cables.length} patched / {left.length} in / {right.length} out
+        <span className="eyebrow after:hidden">
+          {left.length} {left.length === 1 ? 'route' : 'routes'}, {right.length}{' '}
+          {right.length === 1 ? 'origin' : 'origins'}
         </span>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-0">
+      {/* phones: one row per route instead of the drawn board */}
+      <ul className="ledger divide-y divide-border/70 text-xs sm:hidden">
+        {cables.map((c, i) => {
+          const from = left.find((j) => j.id === c.from)
+          const to = right.find((j) => j.id === c.to)
+          if (!from || !to) return null
+          return (
+            <li key={i}>
+              <button
+                type="button"
+                onClick={() => onSelect?.(i)}
+                className="flex w-full flex-col items-start gap-0.5 px-4 py-2.5 text-left"
+              >
+                <span className="flex items-center gap-2 text-foreground">
+                  <span className={cn('lamp', c.active ? 'lamp-on' : 'lamp-off')} />
+                  {from.label}
+                </span>
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  to {to.label}
+                  <span className={cn('lamp', to.state === 'warn' ? 'lamp-warn' : to.state === 'off' ? 'lamp-off' : 'lamp-on')} />
+                </span>
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+
+      <div className="hidden grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-0 sm:grid">
         {/* left rail labels */}
         <ul className="ledger flex min-w-0 flex-col justify-between py-4 pl-3 pr-2 text-xs sm:pl-4" style={{ minHeight: H }}>
           {left.map((j) => (
@@ -198,6 +225,25 @@ export function Patchboard({
             </li>
           ))}
         </ul>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-border px-4 py-2 text-xs text-muted-foreground">
+        <span className="flex items-center gap-2">
+          <span className="h-0.5 w-4 bg-patch" />
+          Route on
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="w-4 border-t border-dashed border-muted-foreground" />
+          Route off
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="lamp lamp-on" />
+          Healthy
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="lamp lamp-off" />
+          Failing health checks
+        </span>
       </div>
     </div>
   )

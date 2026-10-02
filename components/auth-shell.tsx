@@ -5,7 +5,7 @@ const L = [
   { id: 'a', label: '/api/orders/*', state: 'on' as const },
   { id: 'b', label: '/api/catalog/*', state: 'on' as const },
   { id: 'c', label: '/api/auth/*', state: 'on' as const },
-  { id: 'd', label: '/api/search', state: 'warn' as const },
+  { id: 'd', label: '/api/search', state: 'on' as const },
 ]
 const R = [
   { id: 'x', label: 'orders-svc', state: 'on' as const },
@@ -15,7 +15,7 @@ const R = [
 const C = [
   { from: 'a', to: 'x', active: true, live: true },
   { from: 'b', to: 'y', active: true, live: true },
-  { from: 'c', to: 'z', active: true, live: false },
+  { from: 'c', to: 'z', active: true, live: true },
   { from: 'd', to: 'y', active: true, live: true },
 ]
 
