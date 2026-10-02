@@ -30,8 +30,8 @@ const mono = Spline_Sans_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'VantageEdge · the exchange',
-  description: 'Patch your APIs through one switchboard: route, pool, rate-limit, cache.',
+  title: 'VantageEdge: API gateway console',
+  description: 'Route, rate-limit and cache your APIs from one console. Weighted origin pools, per-route auth and request-log analytics.',
   icons: { icon: '/gate.png' },
 }
 
