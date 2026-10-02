@@ -7,7 +7,7 @@ import { qk } from '@/lib/hooks/use-resource'
 import type { AnalyticsWindow } from '@/lib/types'
 import { Stat } from '@/components/stat'
 import { WindowToggle } from '@/components/window-toggle'
-import { CacheDonut, LatencyLine, Sparkline, StatusBars, ThroughputArea } from '@/components/charts'
+import { CacheDonut, LatencyLine, StatusBars, ThroughputArea } from '@/components/charts'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCompact, formatLatency, formatPercent, relativeTime } from '@/lib/utils'
@@ -35,7 +35,7 @@ export default function TrafficPage() {
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
             <span className="lamp lamp-on" />
-            {isFetching ? 'reading' : 'live'}
+            {isFetching ? 'Refreshing' : 'Up to date'}
           </span>
           <WindowToggle value={win} onChange={setWin} />
         </div>
@@ -55,7 +55,7 @@ export default function TrafficPage() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <Panel title="throughput">
+        <Panel title="Throughput">
           {isLoading ? (
             <Skeleton className="h-[240px]" />
           ) : !data ? (
@@ -64,7 +64,7 @@ export default function TrafficPage() {
             <ThroughputArea data={data.series} />
           )}
         </Panel>
-        <Panel title="latency (avg)">
+        <Panel title="Average latency">
           {isLoading ? (
             <Skeleton className="h-[240px]" />
           ) : !data ? (
@@ -73,7 +73,7 @@ export default function TrafficPage() {
             <LatencyLine data={data.series} />
           )}
         </Panel>
-        <Panel title="status codes">
+        <Panel title="Status codes">
           {isLoading ? (
             <Skeleton className="h-[240px]" />
           ) : !data ? (
@@ -82,7 +82,7 @@ export default function TrafficPage() {
             <StatusBars breakdown={data.status_breakdown} />
           )}
         </Panel>
-        <Panel title="cache hit rate">
+        <Panel title="Cache hit rate">
           {isLoading ? (
             <Skeleton className="h-[200px]" />
           ) : !data ? (
@@ -99,7 +99,7 @@ export default function TrafficPage() {
       </section>
 
       <section className="space-y-3">
-        <div className="eyebrow">routes by volume</div>
+        <div className="eyebrow">Routes by volume</div>
         <div className="panel">
           {isLoading ? (
             <Skeleton className="m-4 h-56" />
@@ -113,7 +113,6 @@ export default function TrafficPage() {
                   <TableHead className="w-24 text-right">Requests</TableHead>
                   <TableHead className="w-24 text-right">Avg</TableHead>
                   <TableHead className="w-20 text-right">Errors</TableHead>
-                  <TableHead className="w-28">Shape</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -124,9 +123,6 @@ export default function TrafficPage() {
                     <TableCell className="text-right tabular-nums">{formatLatency(r.avg_latency_ms)}</TableCell>
                     <TableCell className="text-right tabular-nums text-muted-foreground">
                       {r.error_count > 0 ? <span className="text-destructive">{r.error_count}</span> : '0'}
-                    </TableCell>
-                    <TableCell>
-                      <Sparkline points={sparkFor(data!.series, r.count)} />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -151,16 +147,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 function NoData() {
   return (
     <div className="grid h-[240px] place-content-center text-sm text-muted-foreground">
-      Couldn't load this — retrying.
+      Couldn't load traffic. Trying again in 20 seconds.
     </div>
   )
-}
-
-// The per-route series isn't broken out by the endpoint, so shape the overall
-// throughput curve to the route's share — enough to read the trend, honest
-// about being an approximation.
-function sparkFor(series: { count: number }[], routeTotal: number): number[] {
-  const overall = series.reduce((s, b) => s + b.count, 0) || 1
-  const share = routeTotal / overall
-  return series.map((b) => b.count * share)
 }

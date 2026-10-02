@@ -19,7 +19,7 @@ import {
 import type { TimeBucket } from '@/lib/types'
 import { formatCompact, formatLatency } from '@/lib/utils'
 
-// Warm ledger palette — patch-cord, signal lamp, ink.
+// Warm ledger palette: patch-cord, signal lamp, ink.
 export const INK = {
   patch: 'hsl(12 68% 54%)',
   lamp: 'hsl(82 22% 48%)',
@@ -177,17 +177,6 @@ export function CacheDonut({ hitRate, height = 200 }: { hitRate: number; height?
         </Pie>
         <Tooltip content={<TooltipBox />} />
       </PieChart>
-    </ResponsiveContainer>
-  )
-}
-
-export function Sparkline({ points, color = INK.patch }: { points: number[]; color?: string }) {
-  const data = points.map((v, i) => ({ i, v }))
-  return (
-    <ResponsiveContainer width="100%" height={26}>
-      <LineChart data={data}>
-        <Line type="monotone" dataKey="v" stroke={color} strokeWidth={1.25} dot={false} isAnimationActive={false} />
-      </LineChart>
     </ResponsiveContainer>
   )
 }
