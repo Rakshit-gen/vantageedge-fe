@@ -59,9 +59,9 @@ export function AuthModes() {
         </pre>
         <p className="ledger mt-3 text-[11px]">
           {mode.jwt || mode.apikey ? (
-            <span className="text-warning">missing {mode.jwt && mode.apikey ? 'either' : 'it'} → 401 Unauthorized</span>
+            <span className="text-warning">missing {mode.jwt && mode.apikey ? 'either' : 'it'}: 401 Unauthorized</span>
           ) : (
-            <span className="text-lamp">no header needed → 200</span>
+            <span className="text-lamp">no header needed: 200</span>
           )}
         </p>
       </div>

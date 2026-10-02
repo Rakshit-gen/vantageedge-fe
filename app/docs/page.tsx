@@ -2,16 +2,25 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { DocsConfig, HostBar, DocsCode } from '@/components/docs-config'
 import { DocsNav } from '@/components/docs-nav'
-import { RequestSim } from '@/components/request-sim'
+import { RouteMatcher } from '@/components/docs-route-matcher'
+import { RouteBuilder } from '@/components/docs-route-builder'
 import { Endpoints } from '@/components/docs-endpoints'
 import { AuthModes } from '@/components/docs-auth-modes'
-import { ReadingProgress } from '@/components/reading-progress'
-import { Reveal } from '@/components/reveal'
 
 export const metadata = {
   title: 'VantageEdge · docs',
-  description: 'How the exchange works and how to drive it from the API.',
+  description: 'The VantageEdge control plane API: origins, routes, origin pools, API keys and analytics.',
 }
+
+const ERRORS = [
+  ['401', 'Unauthorized', 'The route needs a JWT or API key the request did not carry, or carried an invalid one.'],
+  ['403', 'Tenant suspended', 'The tenant behind this subdomain is suspended.'],
+  ['404', 'Unknown tenant', 'No tenant owns the subdomain in the Host (or X-Tenant-Subdomain) header.'],
+  ['404', 'Route not found', 'No active route matches the path and method.'],
+  ['429', 'Rate limit exceeded', 'The route’s bucket is empty for this caller. Retry-After says how many seconds to wait.'],
+  ['502', 'Bad gateway', 'The origin could not be reached. GET and HEAD are retried first, on a different origin when the pool has one.'],
+  ['503', 'Service unavailable', 'The route has no origin to send to, or the gateway could not load your config.'],
+]
 
 const SECTIONS = [
   ['overview', 'Overview'],
@@ -22,13 +31,13 @@ const SECTIONS = [
   ['keys', 'API keys'],
   ['analytics', 'Analytics'],
   ['auth-modes', 'Auth modes'],
+  ['errors', 'Errors'],
 ]
 
 export default function DocsPage() {
   return (
     <div className="min-h-screen">
-      <ReadingProgress />
-      <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-border bg-background">
         <div className="mx-auto flex h-14 max-w-4xl items-center gap-4 px-5">
           <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> VantageEdge
@@ -45,15 +54,15 @@ export default function DocsPage() {
       <div className="mx-auto max-w-4xl px-5 py-12">
         <h1 className="font-display text-3xl font-semibold tracking-tight">Documentation</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">
-          The gateway forwards requests; the control plane API configures it. Both are one call away from
-          each other, so a change here applies at the edge within seconds.
+          The gateway forwards your traffic; the control plane API on this page configures it. A change
+          made through the API reaches the gateway within seconds.
         </p>
 
         <DocsConfig>
         <div className="mt-10">
         <HostBar />
         <div className="lg:grid lg:grid-cols-[150px_1fr] lg:gap-12">
-          <div className="sticky top-14 z-20 -mx-5 border-y border-border bg-background/90 px-5 py-3 backdrop-blur lg:top-20 lg:mx-0 lg:self-start lg:border-0 lg:bg-transparent lg:p-0">
+          <div className="sticky top-14 z-20 -mx-5 border-y border-border bg-background px-5 py-3 lg:top-20 lg:mx-0 lg:self-start lg:border-0 lg:bg-transparent lg:p-0">
             <DocsNav sections={SECTIONS} />
           </div>
 
@@ -81,12 +90,6 @@ Authorization: Bearer <clerk session jwt>`}
             If your Clerk instance needs a JWT template for the backend audience, set{' '}
             <Code>NEXT_PUBLIC_CLERK_JWT_TEMPLATE</Code> and the console mints the token with it.
           </Callout>
-          <div className="not-prose pt-2">
-            <p className="mb-2 text-xs text-muted-foreground">
-              Send a few requests through the pipeline. Toggle the cache and auth to see where each one stops.
-            </p>
-            <RequestSim />
-          </div>
         </Section>
 
         <Section id="auth" title="Authentication">
@@ -103,7 +106,7 @@ curl https://<host>/api/v1/routes \\
 # machine caller
 curl https://<host>/api/v1/routes \\
   -H "X-API-Key: ve_live_..."`}
-            js={`// session — the console attaches this for you
+            js={`// session: the console attaches this for you
 await fetch("https://<host>/api/v1/routes", {
   headers: { Authorization: \`Bearer \${clerkJwt}\` },
 })
@@ -166,52 +169,21 @@ await fetch("https://<host>/api/v1/routes", {
           <Endpoints
             rows={[
               { verb: 'GET', path: '/routes', desc: 'List routes', note: 'Ordered by priority, highest first, which is also the order they are matched in.' },
-              { verb: 'POST', path: '/routes', desc: 'Create a route', note: 'origin_id is required and must be one of your origins. path_pattern takes a trailing /* wildcard.' },
+              { verb: 'POST', path: '/routes', desc: 'Create a route', note: 'origin_id is required and must be one of your origins. In path_pattern, * matches any run of characters, slashes included, and can sit anywhere: /api/*/health is valid.' },
               { verb: 'GET', path: '/routes/{id}', desc: 'Fetch one', note: 'Includes the resolved pool members.' },
               { verb: 'PATCH', path: '/routes/{id}', desc: 'Update fields', note: 'Partial update. Toggling is_active takes effect at the edge within seconds.' },
               { verb: 'DELETE', path: '/routes/{id}', desc: 'Remove', note: 'Drops the route and its pool bindings. The origins themselves are left alone.' },
             ]}
           />
-          <DocsCode
-            code={`curl -X POST https://<host>/api/v1/routes \\
-  -H "Authorization: Bearer $CLERK_JWT" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "origin_id": "<origin uuid>",
-    "name": "orders",
-    "path_pattern": "/api/orders/*",
-    "methods": ["GET", "POST"],
-    "priority": 10,
-    "auth_mode": "jwt_required",
-    "load_balancing": "round_robin",
-    "is_active": true,
-    "rate_limit_enabled": true,
-    "rate_limit_requests_per_second": 50,
-    "rate_limit_burst": 20,
-    "cache_enabled": false
-  }'`}
-            js={`await fetch("https://<host>/api/v1/routes", {
-  method: "POST",
-  headers: {
-    Authorization: \`Bearer \${clerkJwt}\`,
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    origin_id: "<origin uuid>",
-    name: "orders",
-    path_pattern: "/api/orders/*",
-    methods: ["GET", "POST"],
-    priority: 10,
-    auth_mode: "jwt_required",
-    load_balancing: "round_robin",
-    is_active: true,
-    rate_limit_enabled: true,
-    rate_limit_requests_per_second: 50,
-    rate_limit_burst: 20,
-    cache_enabled: false,
-  }),
-})`}
-          />
+          <p>
+            The gateway tries your active routes from the highest priority down and takes the first one whose
+            path and method both match. Edit the table or the request to check a setup before you create it:
+          </p>
+          <RouteMatcher />
+          <p>
+            Build the create call. The summary under the form says what the gateway will do with it.
+          </p>
+          <RouteBuilder />
         </Section>
 
         <Section id="pool" title="Origin pools">
@@ -226,7 +198,7 @@ await fetch("https://<host>/api/v1/routes", {
             rows={[
               { verb: 'GET', path: '/routes/{id}/origins', desc: 'List the pool', note: "The route's load-balancing pool, including its primary origin." },
               { verb: 'POST', path: '/routes/{id}/origins/{origin_id}', desc: 'Add to the pool', note: 'Adds an existing origin. Its weight comes from the origin record; change it there.' },
-              { verb: 'DELETE', path: '/routes/{id}/origins/{origin_id}', desc: 'Remove from the pool', note: "You cannot remove the route's primary origin this way; repoint the route instead." },
+              { verb: 'DELETE', path: '/routes/{id}/origins/{origin_id}', desc: 'Remove from the pool', note: "Refused if it is the last origin in the pool, since a route with an empty pool can't serve anything." },
             ]}
           />
         </Section>
@@ -261,7 +233,7 @@ await fetch("https://<host>/api/v1/routes", {
     expires_at: "2026-12-31T23:59:59Z",
   }),
 })
-const { key } = await res.json() // ve_live_xxx — shown once`}
+const { key } = await res.json() // ve_live_xxx, shown once`}
           />
         </Section>
 
@@ -311,9 +283,28 @@ const { totals, series, top_routes } = await res.json()`}
           <AuthModes />
         </Section>
 
+        <Section id="errors" title="Errors">
+          <p>
+            What the gateway itself answers with, as opposed to responses your origin sends back. Every one of
+            these is also written to the request log, so it shows up in Traffic.
+          </p>
+          <div className="ledger overflow-hidden rounded border border-border text-xs">
+            {ERRORS.map(([code, body, when]) => (
+              <div key={code + body} className="grid gap-x-4 gap-y-0.5 border-b border-border/70 px-3 py-2 last:border-0 sm:grid-cols-[3rem_11rem_1fr]">
+                <span className={code === '429' ? 'text-warning' : 'text-destructive'}>{code}</span>
+                <span className="text-foreground">{body}</span>
+                <span className="font-sans text-muted-foreground">{when}</span>
+              </div>
+            ))}
+          </div>
+          <p>
+            A response served from the cache carries <Code>X-Cache: HIT</Code>.
+          </p>
+        </Section>
+
         <div className="mt-16 border-t border-border pt-8">
           <Link href="/dashboard" className="text-sm text-patch hover:underline">
-            Open the console →
+            Open the console
           </Link>
         </div>
           </div>
@@ -327,7 +318,7 @@ const { totals, series, top_routes } = await res.json()`}
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
-    <Reveal>
+    <div>
       <section id={id} className="scroll-mt-24 border-t border-border py-10">
         <a href={`#${id}`} className="group flex items-center gap-2">
           <h2 className="font-display text-xl font-semibold tracking-tight">{title}</h2>
@@ -342,7 +333,7 @@ function Section({ id, title, children }: { id: string; title: string; children:
           {children}
         </div>
       </section>
-    </Reveal>
+    </div>
   )
 }
 

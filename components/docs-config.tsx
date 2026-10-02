@@ -48,7 +48,7 @@ export function HostBar() {
   return (
     <div className="panel mb-8 flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
       <label htmlFor="docs-host" className="eyebrow shrink-0 after:hidden">
-        your host
+        Your host
       </label>
       <input
         id="docs-host"
